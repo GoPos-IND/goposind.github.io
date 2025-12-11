@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Chat | GOPOS Admin</title>
+    <link rel="icon" type="image/svg+xml" href="../Assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../index.css">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .chat-detail {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .chat-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-search {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chat-contacts {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .contact-item:hover,
+        .contact-item.active {
+            background: var(--bg-card-hover);
+        }
+
+        .contact-avatar {
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .contact-preview {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-meta {
+            text-align: right;
+        }
+
+        .contact-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .contact-badge {
+            background: var(--pos-orange);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .chat-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-main-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+        }
+
+        .chat-bubble.user {
+            background: var(--bg-card-hover);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.bot {
+            background: var(--gradient-primary);
+            color: white;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bubble-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        @media (max-width: 1024px) {
+            .chat-detail {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-main {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html" class="logo">
+                <div class="logo-icon">📮</div><span class="logo-text">GOPOS</span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Menu Utama</span>
+                <a href="../dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span
+                        class="nav-text">Dashboard</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span
+                        class="nav-text">Analytics</span></a>
+                <a href="chats.html" class="nav-item active"><span class="nav-icon">💬</span><span
+                        class="nav-text">Riwayat Chat</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Manajemen Data</span>
+                <a href="services.html" class="nav-item"><span class="nav-icon">🚚</span><span
+                        class="nav-text">Layanan</span></a>
+                <a href="branches.html" class="nav-item"><span class="nav-icon">🏢</span><span class="nav-text">Kantor
+                        Pos</span></a>
+                <a href="rates.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Tarif
+                        Ongkir</span></a>
+                <a href="faq.html" class="nav-item"><span class="nav-icon">❓</span><span class="nav-text">FAQ</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Lainnya</span>
+                <a href="users.html" class="nav-item"><span class="nav-icon">👥</span><span
+                        class="nav-text">Users</span></a>
+                <a href="feedback.html" class="nav-item"><span class="nav-icon">⭐</span><span
+                        class="nav-text">Feedback</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Kembali ke
+                    Home</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <h2 style="font-size: 1.2rem;">💬 Riwayat Chat</h2>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span
+                        class="icon-moon">🌙</span></button>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="chat-detail">
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-search">
+                        <input type="text" placeholder="Cari percakapan..." class="form-control">
+                    </div>
+                    <div class="chat-contacts">
+                        <div class="contact-item active">
+                            <div class="contact-avatar">J</div>
+                            <div class="contact-info">
+                                <div class="contact-name">+62 812-xxxx-1234</div>
+                                <div class="contact-preview">Cek resi EX123456789ID</div>
+                            </div>
+                            <div class="contact-meta">
+                                <div class="contact-time">2 mnt</div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-avatar">M</div>
+                            <div class="contact-info">
+                                <div class="contact-name">+62 857-xxxx-5678</div>
+                                <div class="contact-preview">Berapa ongkir Jakarta ke Surabaya?</div>
+                            </div>
+                            <div class="contact-meta">
+                                <div class="contact-time">5 mnt</div>
+                                <span class="contact-badge">2</span>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-avatar">A</div>
+                            <div class="contact-info">
+                                <div class="contact-name">+62 878-xxxx-9012</div>
+                                <div class="contact-preview">Kantor pos terdekat Bandung</div>
+                            </div>
+                            <div class="contact-meta">
+                                <div class="contact-time">8 mnt</div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-avatar">R</div>
+                            <div class="contact-info">
+                                <div class="contact-name">+62 821-xxxx-3456</div>
+                                <div class="contact-preview">Perbedaan Pos Express dan Kilat?</div>
+                            </div>
+                            <div class="contact-meta">
+                                <div class="contact-time">12 mnt</div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-avatar">S</div>
+                            <div class="contact-info">
+                                <div class="contact-name">+62 838-xxxx-7890</div>
+                                <div class="contact-preview">Terima kasih informasinya!</div>
+                            </div>
+                            <div class="contact-meta">
+                                <div class="contact-time">15 mnt</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Main -->
+                <div class="chat-main">
+                    <div class="chat-main-header">
+                        <div>
+                            <strong>+62 812-xxxx-1234</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">5 pesan • Terakhir aktif 2 menit
+                                lalu</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">📥 Export</button>
+                    </div>
+                    <div class="chat-messages-area">
+                        <div class="chat-bubble bot">
+                            Halo! 👋 Selamat datang di GOPOS. Saya siap membantu dengan layanan Pos Indonesia. Ada yang
+                            bisa saya bantu?
+                            <div class="bubble-time">14:30</div>
+                        </div>
+                        <div class="chat-bubble user">
+                            Saya mau cek resi
+                            <div class="bubble-time">14:31</div>
+                        </div>
+                        <div class="chat-bubble bot">
+                            Tentu! Silakan kirimkan nomor resi Anda. Format: EX123456789ID atau RR123456789ID
+                            <div class="bubble-time">14:31</div>
+                        </div>
+                        <div class="chat-bubble user">
+                            EX123456789ID
+                            <div class="bubble-time">14:32</div>
+                        </div>
+                        <div class="chat-bubble bot">
+                            📦 <strong>Status Pengiriman</strong><br><br>
+                            Resi: EX123456789ID<br>
+                            Status: <span style="color: #10B981;">✓ Dalam Perjalanan</span><br>
+                            Posisi: Hub Semarang<br>
+                            Estimasi: 9 Des 2024<br><br>
+                            Ada yang lain yang bisa saya bantu?
+                            <div class="bubble-time">14:32</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../dashboard.js"></script>
+</body>
+
+</html>

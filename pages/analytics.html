@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | GOPOS Admin</title>
+    <link rel="icon" type="image/svg+xml" href="../Assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="../index.css">
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+
+<body class="dashboard-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html" class="logo">
+                <div class="logo-icon">📮</div><span class="logo-text">GOPOS</span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Menu Utama</span>
+                <a href="../dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span
+                        class="nav-text">Dashboard</span></a>
+                <a href="analytics.html" class="nav-item active"><span class="nav-icon">📈</span><span
+                        class="nav-text">Analytics</span></a>
+                <a href="chats.html" class="nav-item"><span class="nav-icon">💬</span><span class="nav-text">Riwayat
+                        Chat</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Manajemen Data</span>
+                <a href="services.html" class="nav-item"><span class="nav-icon">🚚</span><span
+                        class="nav-text">Layanan</span></a>
+                <a href="branches.html" class="nav-item"><span class="nav-icon">🏢</span><span class="nav-text">Kantor
+                        Pos</span></a>
+                <a href="rates.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Tarif
+                        Ongkir</span></a>
+                <a href="faq.html" class="nav-item"><span class="nav-icon">❓</span><span class="nav-text">FAQ</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Lainnya</span>
+                <a href="users.html" class="nav-item"><span class="nav-icon">👥</span><span
+                        class="nav-text">Users</span></a>
+                <a href="feedback.html" class="nav-item"><span class="nav-icon">⭐</span><span
+                        class="nav-text">Feedback</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span
+                        class="nav-text">Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Kembali ke
+                    Home</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <h2 style="font-size: 1.2rem;">📈 Analytics</h2>
+            </div>
+            <div class="header-right">
+                <select class="form-control" style="width: 150px;">
+                    <option>7 Hari</option>
+                    <option selected>30 Hari</option>
+                    <option>90 Hari</option>
+                </select>
+                <button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span
+                        class="icon-moon">🌙</span></button>
+            </div>
+        </header>
+
+        <div class="content-wrapper" id="reportContent">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Analytics Dashboard</h1>
+                    <p>Statistik penggunaan GOPOS Chatbot</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="exportToPDF()">📥 Export PDF</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon blue">💬</div>
+                    <div class="stat-content">
+                        <h3>Total Percakapan</h3>
+                        <div class="stat-value">45,832</div>
+                        <div class="stat-change positive">↑ +18.5% dari periode lalu</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div class="stat-content">
+                        <h3>Respon Berhasil</h3>
+                        <div class="stat-value">98.2%</div>
+                        <div class="stat-change positive">↑ +1.2% dari periode lalu</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⏱️</div>
+                    <div class="stat-content">
+                        <h3>Rata-rata Respon</h3>
+                        <div class="stat-value">1.2s</div>
+                        <div class="stat-change positive">↓ -0.3s dari periode lalu</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">👥</div>
+                    <div class="stat-content">
+                        <h3>Pengguna Unik</h3>
+                        <div class="stat-value">12,458</div>
+                        <div class="stat-change positive">↑ +22.1% dari periode lalu</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Tren Penggunaan Harian</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card small">
+                    <div class="chart-header">
+                        <h3>Distribusi Intent</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="intentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Pengguna per Jam</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card small">
+                    <div class="chart-header">
+                        <h3>Top Kota</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="cityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../dashboard.js"></script>
+    <script>
+        // Usage Chart
+        new Chart(document.getElementById('usageChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 30 }, (_, i) => `${i + 1} Des`),
+                datasets: [{
+                    label: 'Percakapan',
+                    data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 800) + 400),
+                    borderColor: '#1E3A5F',
+                    backgroundColor: 'rgba(30, 58, 95, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Intent Chart
+        new Chart(document.getElementById('intentChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cek Resi', 'Cek Ongkir', 'Cari Kantor', 'FAQ', 'Lainnya'],
+                datasets: [{
+                    data: [42, 28, 15, 10, 5],
+                    backgroundColor: ['#1E3A5F', '#F26522', '#3B82F6', '#10B981', '#6B7280']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Hourly Chart
+        new Chart(document.getElementById('hourlyChart'), {
+            type: 'bar',
+            data: {
+                labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Pengguna',
+                    data: [50, 30, 20, 15, 10, 25, 80, 180, 320, 450, 500, 480, 420, 400, 380, 420, 480, 520, 450, 350, 280, 180, 120, 80],
+                    backgroundColor: '#F26522'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // City Chart
+        new Chart(document.getElementById('cityChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Jakarta', 'Surabaya', 'Bandung', 'Semarang', 'Medan'],
+                datasets: [{
+                    label: 'Pengguna',
+                    data: [4500, 2800, 2200, 1800, 1500],
+                    backgroundColor: ['#1E3A5F', '#2B4F7A', '#3B82F6', '#60A5FA', '#93C5FD']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+        });
+
+        // Export to PDF function
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+
+            // Show loading
+            Swal.fire({
+                title: 'Generating PDF...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const element = document.getElementById('reportContent');
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                // Add header
+                pdf.setFontSize(20);
+                pdf.setTextColor(30, 58, 95);
+                pdf.text('GOPOS Analytics Report', 14, 20);
+                pdf.setFontSize(10);
+                pdf.setTextColor(100);
+                pdf.text(`Generated: ${new Date().toLocaleString('id-ID')}`, 14, 28);
+
+                // Add content
+                pdf.addImage(imgData, 'PNG', 0, 35, pdfWidth, pdfHeight);
+
+                // Save
+                pdf.save(`GOPOS_Analytics_${new Date().toISOString().split('T')[0]}.pdf`);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'PDF Berhasil Dibuat!',
+                    text: 'File telah diunduh ke komputer Anda.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Export PDF',
+                    text: 'Terjadi kesalahan saat membuat PDF.'
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ | GOPOS Admin</title>
+    <link rel="icon" type="image/svg+xml" href="../Assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../index.css">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .faq-question:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .faq-question h4 {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .faq-toggle {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.open .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item.open .faq-answer {
+            padding: 0 20px 20px;
+            max-height: 500px;
+        }
+
+        .faq-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 16px;
+        }
+
+        .faq-category {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            background: rgba(30, 58, 95, 0.2);
+            color: var(--pos-navy);
+            border-radius: var(--radius-full);
+            margin-right: 12px;
+        }
+
+        [data-theme="dark"] .faq-category {
+            background: rgba(242, 101, 34, 0.2);
+            color: var(--pos-orange);
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html" class="logo">
+                <div class="logo-icon">📮</div><span class="logo-text">GOPOS</span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Menu Utama</span>
+                <a href="../dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span
+                        class="nav-text">Dashboard</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span
+                        class="nav-text">Analytics</span></a>
+                <a href="chats.html" class="nav-item"><span class="nav-icon">💬</span><span class="nav-text">Riwayat
+                        Chat</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Manajemen Data</span>
+                <a href="services.html" class="nav-item"><span class="nav-icon">🚚</span><span
+                        class="nav-text">Layanan</span></a>
+                <a href="branches.html" class="nav-item"><span class="nav-icon">🏢</span><span class="nav-text">Kantor
+                        Pos</span></a>
+                <a href="rates.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Tarif
+                        Ongkir</span></a>
+                <a href="faq.html" class="nav-item active"><span class="nav-icon">❓</span><span
+                        class="nav-text">FAQ</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-section-title">Lainnya</span>
+                <a href="users.html" class="nav-item"><span class="nav-icon">👥</span><span
+                        class="nav-text">Users</span></a>
+                <a href="feedback.html" class="nav-item"><span class="nav-icon">⭐</span><span
+                        class="nav-text">Feedback</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Kembali ke
+                    Home</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <h2 style="font-size: 1.2rem;">❓ Manajemen FAQ</h2>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span
+                        class="icon-moon">🌙</span></button>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Manajemen FAQ</h1>
+                    <p>Kelola pertanyaan yang sering diajukan (Knowledge Base)</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="showAddModal()">➕ Tambah FAQ</button>
+                </div>
+            </div>
+
+            <!-- FAQ List -->
+            <div class="faq-list">
+                <div class="faq-item open">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-category">Pengiriman</span>
+                        <h4>Bagaimana cara cek resi pengiriman?</h4>
+                        <div class="faq-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">✏️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">🗑️</button>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Untuk cek resi pengiriman, Anda dapat mengirimkan nomor resi ke chatbot GOPOS melalui
+                            WhatsApp. Format: ketik "cek resi [nomor resi]" contoh: "cek resi EX123456789ID". Sistem
+                            akan otomatis menampilkan status terkini paket Anda.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-category">Tarif</span>
+                        <h4>Bagaimana cara menghitung ongkos kirim?</h4>
+                        <div class="faq-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">✏️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">🗑️</button>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Ketik "cek ongkir [kota asal] ke [kota tujuan] [berat dalam kg]". Contoh: "cek ongkir Jakarta
+                            ke Surabaya 2kg". Sistem akan menampilkan daftar harga untuk berbagai layanan pengiriman.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-category">Layanan</span>
+                        <h4>Apa perbedaan Pos Express dan Kilat Khusus?</h4>
+                        <div class="faq-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">✏️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">🗑️</button>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Pos Express adalah layanan tercepat dengan jaminan sampai H+1 untuk kota besar, cocok untuk
+                            dokumen penting. Kilat Khusus lebih ekonomis dengan estimasi 2-3 hari, cocok untuk paket
+                            standar.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-category">Kantor Pos</span>
+                        <h4>Bagaimana cara mencari kantor pos terdekat?</h4>
+                        <div class="faq-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">✏️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">🗑️</button>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Ketik "cari kantor pos [nama kota/kecamatan]". Contoh: "cari kantor pos Menteng". Sistem akan
+                            menampilkan daftar kantor pos terdekat beserta alamat dan jam operasional.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-category">Umum</span>
+                        <h4>Apakah layanan GOPOS tersedia 24 jam?</h4>
+                        <div class="faq-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">✏️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">🗑️</button>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Ya! Chatbot GOPOS tersedia 24/7 untuk menjawab pertanyaan Anda seputar layanan Pos Indonesia.
+                            Anda dapat menghubungi kami kapan saja melalui WhatsApp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../dashboard.js"></script>
+    <script>
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            item.classList.toggle('open');
+        }
+
+        function showAddModal() {
+            Swal.fire({
+                title: 'Tambah FAQ Baru',
+                html: `
+          <select id="swal-category" class="swal2-input">
+            <option>Pilih Kategori</option>
+            <option>Pengiriman</option>
+            <option>Tarif</option>
+            <option>Layanan</option>
+            <option>Kantor Pos</option>
+            <option>Umum</option>
+          </select>
+          <input type="text" id="swal-question" class="swal2-input" placeholder="Pertanyaan">
+          <textarea id="swal-answer" class="swal2-textarea" placeholder="Jawaban"></textarea>
+        `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Berhasil!', 'FAQ berhasil ditambahkan', 'success');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

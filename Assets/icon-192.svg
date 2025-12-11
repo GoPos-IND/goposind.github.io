@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="posGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E3A5F"/>
+      <stop offset="100%" style="stop-color:#2B4F7A"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <!-- Background Circle -->
+  <circle cx="96" cy="96" r="90" fill="url(#posGrad192)"/>
+  <!-- Orange Dot Accent -->
+  <circle cx="155" cy="40" r="20" fill="#F26522"/>
+  <!-- Mail Envelope -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="60" width="112" height="75" rx="10" fill="white"/>
+    <!-- Envelope Flap -->
+    <path d="M 40 70 L 96 110 L 152 70" stroke="#1E3A5F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Lines on envelope -->
+    <line x1="55" y1="100" x2="85" y2="100" stroke="#1E3A5F" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+    <line x1="55" y1="110" x2="75" y2="110" stroke="#F26522" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+    <line x1="55" y1="120" x2="80" y2="120" stroke="#1E3A5F" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  </g>
+  <!-- Speed Lines -->
+  <line x1="25" y1="80" x2="35" y2="80" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <line x1="20" y1="96" x2="32" y2="96" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="25" y1="112" x2="35" y2="112" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+</svg>
