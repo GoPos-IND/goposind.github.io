@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOPOS Admin Dashboard - Kelola chatbot WhatsApp PT Pos Indonesia">
+    <title>Dashboard | GOPOS Admin</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="Assets/favicon.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">📮</div>
+                <span class="logo-text">GOPOS</span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Menu Utama</span>
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="pages/analytics.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Analytics</span>
+                </a>
+                <a href="pages/chats.html" class="nav-item">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">Riwayat Chat</span>
+                    <span class="nav-badge">12</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Manajemen Data</span>
+                <a href="pages/services.html" class="nav-item">
+                    <span class="nav-icon">🚚</span>
+                    <span class="nav-text">Layanan</span>
+                </a>
+                <a href="pages/branches.html" class="nav-item">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Kantor Pos</span>
+                </a>
+                <a href="pages/rates.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Tarif Ongkir</span>
+                </a>
+                <a href="pages/faq.html" class="nav-item">
+                    <span class="nav-icon">❓</span>
+                    <span class="nav-text">FAQ</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Lainnya</span>
+                <a href="pages/users.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Users</span>
+                </a>
+                <a href="pages/feedback.html" class="nav-item">
+                    <span class="nav-icon">⭐</span>
+                    <span class="nav-text">Feedback</span>
+                </a>
+                <a href="pages/settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="index.html" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Kembali ke Home</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Cari..." class="search-input">
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+
+                <div class="notification-btn" id="notificationBtn">
+                    <span>🔔</span>
+                    <span class="notification-badge">3</span>
+                </div>
+
+                <div class="user-profile" id="userProfile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <span class="user-name">Admin</span>
+                        <span class="user-role">Administrator</span>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="#" class="dropdown-item">
+                            <span>👤</span> Profil Saya
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <span>⚙️</span> Pengaturan
+                        </a>
+                        <hr>
+                        <a href="index.html" class="dropdown-item logout" id="logoutBtn">
+                            <span>🚪</span> Keluar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-wrapper">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                    <p>Selamat datang di GOPOS Admin Dashboard</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <span>🔄</span> Refresh
+                    </button>
+                    <button class="btn btn-primary">
+                        <span>📊</span> Export Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon blue">💬</div>
+                    <div class="stat-content">
+                        <h3>Total Chat</h3>
+                        <div class="stat-value">12,458</div>
+                        <div class="stat-change positive">
+                            <span>↑</span> +12.5% dari bulan lalu
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">👥</div>
+                    <div class="stat-content">
+                        <h3>Pengguna Aktif</h3>
+                        <div class="stat-value">3,284</div>
+                        <div class="stat-change positive">
+                            <span>↑</span> +8.2% dari bulan lalu
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">📦</div>
+                    <div class="stat-content">
+                        <h3>Resi Dilacak</h3>
+                        <div class="stat-value">8,932</div>
+                        <div class="stat-change positive">
+                            <span>↑</span> +15.3% dari bulan lalu
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">⭐</div>
+                    <div class="stat-content">
+                        <h3>Rating</h3>
+                        <div class="stat-value">4.8/5</div>
+                        <div class="stat-change positive">
+                            <span>↑</span> +0.3 dari bulan lalu
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Statistik Chat per Hari</h3>
+                        <div class="chart-actions">
+                            <select class="chart-select" id="chatPeriod">
+                                <option value="7">7 Hari</option>
+                                <option value="30" selected>30 Hari</option>
+                                <option value="90">90 Hari</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chatChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card small">
+                    <div class="chart-header">
+                        <h3>Jenis Pertanyaan</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="questionTypeChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #E31E24;"></span>
+                            Cek Resi (45%)
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #F7941D;"></span>
+                            Cek Ongkir (30%)
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #3B82F6;"></span>
+                            Cari Kantor (15%)
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #10B981;"></span>
+                            Lainnya (10%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-row">
+                <div class="activity-card">
+                    <div class="card-header">
+                        <h3>Chat Terbaru</h3>
+                        <a href="pages/chats.html" class="view-all">Lihat Semua →</a>
+                    </div>
+                    <div class="chat-list">
+                        <div class="chat-item">
+                            <div class="chat-avatar">J</div>
+                            <div class="chat-content">
+                                <div class="chat-header-row">
+                                    <span class="chat-name">+62 812-xxxx-1234</span>
+                                    <span class="chat-time">2 menit yang lalu</span>
+                                </div>
+                                <p class="chat-message">Cek resi EX123456789ID</p>
+                            </div>
+                            <span class="chat-status success">Selesai</span>
+                        </div>
+
+                        <div class="chat-item">
+                            <div class="chat-avatar">M</div>
+                            <div class="chat-content">
+                                <div class="chat-header-row">
+                                    <span class="chat-name">+62 857-xxxx-5678</span>
+                                    <span class="chat-time">5 menit yang lalu</span>
+                                </div>
+                                <p class="chat-message">Berapa ongkir Jakarta ke Surabaya?</p>
+                            </div>
+                            <span class="chat-status success">Selesai</span>
+                        </div>
+
+                        <div class="chat-item">
+                            <div class="chat-avatar">A</div>
+                            <div class="chat-content">
+                                <div class="chat-header-row">
+                                    <span class="chat-name">+62 878-xxxx-9012</span>
+                                    <span class="chat-time">8 menit yang lalu</span>
+                                </div>
+                                <p class="chat-message">Di mana kantor pos terdekat dari Bandung?</p>
+                            </div>
+                            <span class="chat-status success">Selesai</span>
+                        </div>
+
+                        <div class="chat-item">
+                            <div class="chat-avatar">R</div>
+                            <div class="chat-content">
+                                <div class="chat-header-row">
+                                    <span class="chat-name">+62 821-xxxx-3456</span>
+                                    <span class="chat-time">12 menit yang lalu</span>
+                                </div>
+                                <p class="chat-message">Apa perbedaan Pos Express dan Kilat Khusus?</p>
+                            </div>
+                            <span class="chat-status pending">Pending</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-card">
+                    <div class="card-header">
+                        <h3>Feedback Terbaru</h3>
+                        <a href="pages/feedback.html" class="view-all">Lihat Semua →</a>
+                    </div>
+                    <div class="feedback-list">
+                        <div class="feedback-item">
+                            <div class="feedback-header">
+                                <div class="feedback-stars">⭐⭐⭐⭐⭐</div>
+                                <span class="feedback-time">1 jam yang lalu</span>
+                            </div>
+                            <p class="feedback-text">"Sangat membantu! Respon cepat dan akurat."</p>
+                            <span class="feedback-user">+62 812-xxxx-1234</span>
+                        </div>
+
+                        <div class="feedback-item">
+                            <div class="feedback-header">
+                                <div class="feedback-stars">⭐⭐⭐⭐</div>
+                                <span class="feedback-time">3 jam yang lalu</span>
+                            </div>
+                            <p class="feedback-text">"Bot-nya pintar, bisa jawab pertanyaan saya dengan baik."</p>
+                            <span class="feedback-user">+62 857-xxxx-5678</span>
+                        </div>
+
+                        <div class="feedback-item">
+                            <div class="feedback-header">
+                                <div class="feedback-stars">⭐⭐⭐⭐⭐</div>
+                                <span class="feedback-time">5 jam yang lalu</span>
+                            </div>
+                            <p class="feedback-text">"Praktis banget cek resi via WhatsApp!"</p>
+                            <span class="feedback-user">+62 878-xxxx-9012</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>Aksi Cepat</h3>
+                <div class="actions-grid">
+                    <a href="pages/services.html" class="action-card">
+                        <span class="action-icon">🚚</span>
+                        <span class="action-text">Kelola Layanan</span>
+                    </a>
+                    <a href="pages/branches.html" class="action-card">
+                        <span class="action-icon">🏢</span>
+                        <span class="action-text">Kelola Kantor Pos</span>
+                    </a>
+                    <a href="pages/rates.html" class="action-card">
+                        <span class="action-icon">💰</span>
+                        <span class="action-text">Update Tarif</span>
+                    </a>
+                    <a href="pages/faq.html" class="action-card">
+                        <span class="action-icon">❓</span>
+                        <span class="action-text">Kelola FAQ</span>
+                    </a>
+                    <a href="pages/users.html" class="action-card">
+                        <span class="action-icon">👥</span>
+                        <span class="action-text">Kelola Users</span>
+                    </a>
+                    <a href="pages/analytics.html" class="action-card">
+                        <span class="action-icon">📈</span>
+                        <span class="action-text">Lihat Analytics</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

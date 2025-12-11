@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="GOPOS - GO-LANG POS ASSISTANT. Chatbot WhatsApp berbasis Gemini AI untuk PT Pos Indonesia. Cek resi, ongkir, dan layanan pos lainnya dengan mudah.">
+  <meta name="keywords" content="gopos, pos indonesia, chatbot, whatsapp, cek resi, cek ongkir, gemini ai, golang">
+  <meta name="author" content="PT Pos Indonesia">
+  <title>GOPOS - GO-LANG POS ASSISTANT | Chatbot WhatsApp PT Pos Indonesia</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="Assets/favicon.svg">
+  <link rel="apple-touch-icon" href="Assets/apple-touch-icon.svg">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E3A5F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <!-- Background Animation -->
+  <div class="bg-animation"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="logo">
+        <div class="logo-icon">📮</div>
+        <span class="logo-text">GOPOS</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features">Fitur</a></li>
+        <li><a href="#services">Layanan</a></li>
+        <li><a href="#about">Tentang</a></li>
+        <li><a href="#contact">Kontak</a></li>
+      </ul>
+
+      <div class="nav-buttons">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <span class="icon-sun">☀️</span>
+          <span class="icon-moon">🌙</span>
+        </button>
+
+        <button class="btn btn-secondary" id="loginBtn">Masuk</button>
+        <button class="btn btn-primary" id="registerBtn">Daftar</button>
+
+        <!-- User Menu (Hidden by default) -->
+        <div class="user-menu hidden" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+              <h4 id="userName">User</h4>
+              <p id="userEmail">user@email.com</p>
+            </div>
+            <button class="user-dropdown-item">
+              <span>📊</span> Dashboard
+            </button>
+            <button class="user-dropdown-item">
+              <span>⚙️</span> Pengaturan
+            </button>
+            <button class="user-dropdown-item logout" id="logoutBtn">
+              <span>🚪</span> Keluar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">✕</button>
+    <div class="mobile-nav-links">
+      <a href="#features">📦 Fitur</a>
+      <a href="#services">🚚 Layanan</a>
+      <a href="#about">ℹ️ Tentang</a>
+      <a href="#contact">📞 Kontak</a>
+    </div>
+    <div class="mobile-menu-buttons">
+      <button class="btn btn-secondary btn-full" id="mobileLoginBtn">Masuk</button>
+      <button class="btn btn-primary btn-full" id="mobileRegisterBtn">Daftar</button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>🚀</span> Powered by Gemini AI
+        </div>
+        <h1>
+          Layanan <span class="highlight">POS Indonesia</span> dalam Genggaman
+        </h1>
+        <p>
+          GOPOS adalah chatbot WhatsApp cerdas untuk membantu Anda cek resi,
+          hitung ongkir, cari kantor pos terdekat, dan informasi layanan PT Pos Indonesia lainnya 24/7.
+        </p>
+        <div class="hero-buttons">
+          <button class="btn btn-whatsapp btn-lg" id="heroWhatsappBtn">
+            <span>💬</span> Chat via WhatsApp
+          </button>
+          <a href="#features" class="btn btn-secondary btn-lg">
+            Pelajari Fitur
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="chat-preview">
+          <div class="chat-header">
+            <div class="chat-avatar">📮</div>
+            <div class="chat-info">
+              <h4>GOPOS Assistant</h4>
+              <span>● Online 24/7</span>
+            </div>
+          </div>
+          <div class="chat-messages">
+            <div class="message bot">
+              Halo! 👋 Selamat datang di GOPOS. Saya siap membantu Anda dengan layanan Pos Indonesia.
+            </div>
+            <div class="message user">
+              Saya ingin cek resi pengiriman saya
+            </div>
+            <div class="message bot">
+              Tentu! Silakan kirimkan nomor resi Anda, dan saya akan langsung cek statusnya. 📦
+            </div>
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card reveal">
+          <div class="stat-icon">📨</div>
+          <div class="stat-number" data-count="50000">0</div>
+          <div class="stat-label">Pesan Diproses</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-icon">👥</div>
+          <div class="stat-number" data-count="10000">0</div>
+          <div class="stat-label">Pengguna Aktif</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-icon">📦</div>
+          <div class="stat-number" data-count="25000">0</div>
+          <div class="stat-label">Resi Dilacak</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-number" data-count="98">0</div>
+          <div class="stat-label">% Kepuasan</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Fitur <span>Unggulan</span> GOPOS</h2>
+        <p>Semua layanan Pos Indonesia dalam satu chatbot WhatsApp. Akses mudah, cepat, dan tersedia 24/7.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">📦</div>
+          <h3>Cek Resi Real-time</h3>
+          <p>Lacak paket Anda secara real-time. Dapatkan update status pengiriman langsung dari sistem Pos Indonesia.
+          </p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">💰</div>
+          <h3>Hitung Ongkos Kirim</h3>
+          <p>Kalkulasi ongkir instan ke seluruh Indonesia. Bandingkan harga berbagai layanan pengiriman.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">📍</div>
+          <h3>Cari Kantor Pos</h3>
+          <p>Temukan kantor pos terdekat dengan alamat, jam operasional, dan petunjuk arah lengkap.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🤖</div>
+          <h3>AI Gemini Cerdas</h3>
+          <p>Didukung teknologi Gemini AI yang mampu memahami pertanyaan dalam bahasa natural.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">❓</div>
+          <h3>FAQ Interaktif</h3>
+          <p>Jawaban cepat untuk pertanyaan umum seputar layanan, tarif, dan kebijakan Pos Indonesia.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">⚡</div>
+          <h3>Respon Instan</h3>
+          <p>Tidak perlu menunggu lama. Dapatkan jawaban dalam hitungan detik, kapan saja.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services" id="services">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Layanan <span>Pos Indonesia</span></h2>
+        <p>Berbagai layanan pengiriman yang dapat Anda gunakan melalui GOPOS.</p>
+      </div>
+
+      <div class="services-grid">
+        <div class="service-card reveal-left">
+          <div class="service-icon">⚡</div>
+          <div class="service-content">
+            <h3>Pos Express</h3>
+            <p>Layanan pengiriman tercepat dengan jaminan sampai H+1 untuk kota-kota besar di Indonesia.</p>
+            <a href="#" class="service-link">Pelajari lebih lanjut →</a>
+          </div>
+        </div>
+
+        <div class="service-card reveal-right">
+          <div class="service-icon">📮</div>
+          <div class="service-content">
+            <h3>Pos Kilat Khusus</h3>
+            <p>Pengiriman cepat dengan harga terjangkau ke seluruh wilayah Indonesia.</p>
+            <a href="#" class="service-link">Pelajari lebih lanjut →</a>
+          </div>
+        </div>
+
+        <div class="service-card reveal-left">
+          <div class="service-icon">📦</div>
+          <div class="service-content">
+            <h3>Pos Reguler</h3>
+            <p>Layanan pengiriman ekonomis untuk paket standar dengan jangkauan luas.</p>
+            <a href="#" class="service-link">Pelajari lebih lanjut →</a>
+          </div>
+        </div>
+
+        <div class="service-card reveal-right">
+          <div class="service-icon">🌍</div>
+          <div class="service-content">
+            <h3>Pos Internasional</h3>
+            <p>Kirim paket ke luar negeri dengan jaringan internasional Pos Indonesia.</p>
+            <a href="#" class="service-link">Pelajari lebih lanjut →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="features" id="about">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Tentang <span>GOPOS</span></h2>
+        <p>Proyek pengembangan chatbot WhatsApp berbasis Gemini AI untuk meningkatkan layanan pelanggan PT Pos
+          Indonesia.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">🎯</div>
+          <h3>Misi Kami</h3>
+          <p>Mempermudah akses masyarakat terhadap informasi dan layanan Pos Indonesia melalui teknologi AI.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">💻</div>
+          <h3>Teknologi</h3>
+          <p>Dikembangkan menggunakan Go-Lang dan terintegrasi dengan Gemini AI untuk pemahaman bahasa alami.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🏛️</div>
+          <h3>PT Pos Indonesia</h3>
+          <p>Bagian dari transformasi digital BUMN untuk memberikan pelayanan terbaik kepada masyarakat Indonesia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section" id="contact">
+    <div class="container">
+      <div class="cta-box reveal">
+        <h2>Siap Mencoba GOPOS?</h2>
+        <p>Mulai chat dengan GOPOS sekarang dan rasakan kemudahan akses layanan Pos Indonesia!</p>
+        <button class="btn btn-lg" id="ctaWhatsappBtn">
+          💬 Mulai Chat Sekarang
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <div class="logo-icon">📮</div>
+            <span class="logo-text">GOPOS</span>
+          </a>
+          <p>GO-LANG POS ASSISTANT - Chatbot WhatsApp berbasis Gemini AI untuk PT Pos Indonesia.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">📱</a>
+            <a href="#" class="social-link">💬</a>
+            <a href="#" class="social-link">📧</a>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <h4>Layanan</h4>
+          <ul>
+            <li><a href="#">Cek Resi</a></li>
+            <li><a href="#">Cek Ongkir</a></li>
+            <li><a href="#">Cari Kantor Pos</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Perusahaan</h4>
+          <ul>
+            <li><a href="#">Tentang Kami</a></li>
+            <li><a href="#">PT Pos Indonesia</a></li>
+            <li><a href="#">Karir</a></li>
+            <li><a href="#">Berita</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Bantuan</h4>
+          <ul>
+            <li><a href="#">Pusat Bantuan</a></li>
+            <li><a href="#">Hubungi Kami</a></li>
+            <li><a href="#">Kebijakan Privasi</a></li>
+            <li><a href="#">Syarat & Ketentuan</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2024 GOPOS - PT Pos Indonesia. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privasi</a>
+          <a href="#">Syarat</a>
+          <a href="#">Cookie</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chatbot Demo Widget replaces WhatsApp Float -->
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <button class="modal-close">×</button>
+      <div class="modal-header">
+        <div class="logo-icon">📮</div>
+        <h2>Selamat Datang!</h2>
+        <p>Masuk ke akun GOPOS Anda</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="nama@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <div class="password-input">
+            <input type="password" id="loginPassword" class="form-control" placeholder="Masukkan password" required>
+            <button type="button" class="password-toggle"><span>👁</span></button>
+          </div>
+        </div>
+        <div class="form-links">
+          <label></label>
+          <a href="#" data-modal="resetModal">Lupa Password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Masuk</button>
+        <div class="form-footer">
+          Belum punya akun? <a href="#" data-modal="registerModal">Daftar sekarang</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal">
+      <button class="modal-close">×</button>
+      <div class="modal-header">
+        <div class="logo-icon">📮</div>
+        <h2>Buat Akun Baru</h2>
+        <p>Daftar untuk menggunakan GOPOS</p>
+      </div>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="registerName">Nama Lengkap</label>
+          <input type="text" id="registerName" class="form-control" placeholder="Masukkan nama lengkap" required>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" class="form-control" placeholder="nama@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <div class="password-input">
+            <input type="password" id="registerPassword" class="form-control" placeholder="Minimal 6 karakter" required
+              minlength="6">
+            <button type="button" class="password-toggle"><span>👁</span></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Konfirmasi Password</label>
+          <div class="password-input">
+            <input type="password" id="confirmPassword" class="form-control" placeholder="Ulangi password" required>
+            <button type="button" class="password-toggle"><span>👁</span></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Daftar</button>
+        <div class="form-footer">
+          Sudah punya akun? <a href="#" data-modal="loginModal">Masuk di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal">
+      <button class="modal-close">×</button>
+      <div class="modal-header">
+        <div class="logo-icon">🔐</div>
+        <h2>Reset Password</h2>
+        <p>Masukkan email dan password baru Anda</p>
+      </div>
+      <form id="resetForm">
+        <div class="form-group">
+          <label for="resetEmail">Email</label>
+          <input type="email" id="resetEmail" class="form-control" placeholder="nama@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="newPassword">Password Baru</label>
+          <div class="password-input">
+            <input type="password" id="newPassword" class="form-control" placeholder="Minimal 6 karakter" required
+              minlength="6">
+            <button type="button" class="password-toggle"><span>👁</span></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirmNewPassword">Konfirmasi Password Baru</label>
+          <div class="password-input">
+            <input type="password" id="confirmNewPassword" class="form-control" placeholder="Ulangi password baru"
+              required>
+            <button type="button" class="password-toggle"><span>👁</span></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Reset Password</button>
+        <div class="form-footer">
+          Ingat password Anda? <a href="#" data-modal="loginModal">Kembali ke Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Chatbot Demo Widget -->
+  <div class="chatbot-demo" id="chatbotDemo">
+    <button class="chatbot-toggle" id="chatbotToggle">
+      <span class="chatbot-icon">🤖</span>
+      <span class="chatbot-close">✕</span>
+    </button>
+    <div class="chatbot-window" id="chatbotWindow">
+      <div class="chatbot-header">
+        <div class="chatbot-avatar">📮</div>
+        <div class="chatbot-title">
+          <strong>GOPOS Bot</strong>
+          <span>Online • Demo Mode</span>
+        </div>
+      </div>
+      <div class="chatbot-messages" id="chatbotMessages">
+        <div class="bot-message">
+          <div class="message-bubble">
+            Halo! 👋 Saya GOPOS Bot. Saya bisa membantu Anda dengan:
+            <ul style="margin: 8px 0 0 16px;">
+              <li>📦 Cek resi pengiriman</li>
+              <li>💰 Cek ongkos kirim</li>
+              <li>🏢 Cari kantor pos</li>
+              <li>❓ Jawab pertanyaan umum</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="chatbot-input">
+        <input type="text" id="chatbotInput" placeholder="Ketik pesan..." autocomplete="off">
+        <button id="chatbotSend">➤</button>
+      </div>
+      <div class="chatbot-suggestions">
+        <button class="suggestion-btn" data-msg="Cek resi EX123456789ID">📦 Cek Resi</button>
+        <button class="suggestion-btn" data-msg="Ongkir Jakarta ke Bandung 1kg">💰 Cek Ongkir</button>
+        <button class="suggestion-btn" data-msg="Kantor pos terdekat Jakarta">🏢 Cari Kantor</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('✅ GOPOS: Service Worker registered', registration.scope);
+          })
+          .catch((error) => {
+            console.log('⚠️ GOPOS: Service Worker registration failed', error);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>

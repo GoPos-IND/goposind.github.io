@@ -1,0 +1,36 @@
+{
+    "name": "GOPOS - GO-LANG POS ASSISTANT",
+    "short_name": "GOPOS",
+    "description": "Chatbot WhatsApp berbasis Gemini AI untuk PT Pos Indonesia",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#0F172A",
+    "theme_color": "#1E3A5F",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "Assets/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "Assets/icon-192.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "Assets/apple-touch-icon.svg",
+            "sizes": "180x180",
+            "type": "image/svg+xml",
+            "purpose": "apple touch icon"
+        }
+    ],
+    "categories": [
+        "business",
+        "utilities"
+    ],
+    "lang": "id",
+    "dir": "ltr"
+}
