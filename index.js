@@ -683,6 +683,7 @@ const ChatbotDemo = {
         if (!this.widget) return;
 
         this.bindEvents();
+        this.loadSavedSize();
     },
 
     bindEvents() {
@@ -703,6 +704,130 @@ const ChatbotDemo = {
                 this.sendMessage();
             });
         });
+
+        // Size control buttons
+        this.initSizeControls();
+
+        // Custom resize handle (drag from top-left)
+        this.initResizeHandle();
+    },
+
+    // Size preset configurations
+    sizePresets: {
+        small: { width: 320, height: 420 },
+        medium: { width: 380, height: 520 },
+        large: { width: 500, height: 650 }
+    },
+
+    initSizeControls() {
+        const smallBtn = document.getElementById('sizeSmall');
+        const mediumBtn = document.getElementById('sizeMedium');
+        const largeBtn = document.getElementById('sizeLarge');
+
+        smallBtn?.addEventListener('click', () => this.setSize('small'));
+        mediumBtn?.addEventListener('click', () => this.setSize('medium'));
+        largeBtn?.addEventListener('click', () => this.setSize('large'));
+    },
+
+    setSize(size) {
+        const preset = this.sizePresets[size];
+        if (!preset || !this.window) return;
+
+        this.window.style.width = preset.width + 'px';
+        this.window.style.height = preset.height + 'px';
+
+        // Save preference
+        localStorage.setItem('gopos-chatbot-size', size);
+
+        // Show feedback
+        Toast.show(`Ukuran chat: ${size === 'small' ? 'Kecil' : size === 'medium' ? 'Sedang' : 'Besar'}`, 'success');
+    },
+
+    initResizeHandle() {
+        const handle = document.getElementById('chatbotResizeHandle');
+        if (!handle || !this.window) return;
+
+        let isResizing = false;
+        let startX, startY, startWidth, startHeight;
+
+        handle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = this.window.offsetWidth;
+            startHeight = this.window.offsetHeight;
+
+            document.body.style.cursor = 'nw-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            // Calculate new size (inverted because we're dragging from top-left)
+            const deltaX = startX - e.clientX;
+            const deltaY = startY - e.clientY;
+
+            let newWidth = startWidth + deltaX;
+            let newHeight = startHeight + deltaY;
+
+            // Apply min/max constraints
+            newWidth = Math.max(300, Math.min(600, newWidth));
+            newHeight = Math.max(400, Math.min(700, newHeight));
+
+            this.window.style.width = newWidth + 'px';
+            this.window.style.height = newHeight + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
+
+        // Touch support for mobile
+        handle.addEventListener('touchstart', (e) => {
+            isResizing = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startWidth = this.window.offsetWidth;
+            startHeight = this.window.offsetHeight;
+            e.preventDefault();
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isResizing) return;
+
+            const deltaX = startX - e.touches[0].clientX;
+            const deltaY = startY - e.touches[0].clientY;
+
+            let newWidth = startWidth + deltaX;
+            let newHeight = startHeight + deltaY;
+
+            newWidth = Math.max(300, Math.min(600, newWidth));
+            newHeight = Math.max(400, Math.min(700, newHeight));
+
+            this.window.style.width = newWidth + 'px';
+            this.window.style.height = newHeight + 'px';
+        });
+
+        document.addEventListener('touchend', () => {
+            isResizing = false;
+        });
+    },
+
+    loadSavedSize() {
+        const savedSize = localStorage.getItem('gopos-chatbot-size');
+        if (savedSize && this.sizePresets[savedSize]) {
+            const preset = this.sizePresets[savedSize];
+            if (this.window) {
+                this.window.style.width = preset.width + 'px';
+                this.window.style.height = preset.height + 'px';
+            }
+        }
     },
 
     toggleChat() {
