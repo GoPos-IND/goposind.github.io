@@ -545,136 +545,42 @@
 
   <script src="index.js"></script>
 
-  <!-- Gemini AI Chatbot Integration (REST API) - Secure Version -->
+  <!-- GOPOS Chatbot Backend Integration - Secure Proxy -->
   <script>
-    // ===== Secure API Key Manager =====
-    const SecureKeyManager = {
-      STORAGE_KEY: 'gopos_gemini_key',
+    // ===== GOPOS Chatbot Configuration =====
+    const CHATBOT_CONFIG = {
+      // Backend API URL - Update this when deploying
+      // For local development: 'http://localhost:5500'
+      // For production: 'https://backend-gopos.personalsmz.my.id'
+      apiUrl: 'https://backend-gopos.personalsmz.my.id',
 
-      // Simple obfuscation (base64 + reverse)
-      encode(str) {
-        return btoa(str).split('').reverse().join('');
-      },
-
-      decode(str) {
-        return atob(str.split('').reverse().join(''));
-      },
-
-      // Save API key to localStorage
-      setKey(apiKey) {
-        try {
-          const encoded = this.encode(apiKey);
-          localStorage.setItem(this.STORAGE_KEY, encoded);
-          return true;
-        } catch (e) {
-          console.error('Failed to save API key:', e);
-          return false;
-        }
-      },
-
-      // Get API key from localStorage
-      getKey() {
-        try {
-          const encoded = localStorage.getItem(this.STORAGE_KEY);
-          if (!encoded) return null;
-          return this.decode(encoded);
-        } catch (e) {
-          console.error('Failed to retrieve API key:', e);
-          return null;
-        }
-      },
-
-      // Check if key exists
-      hasKey() {
-        return !!localStorage.getItem(this.STORAGE_KEY);
-      },
-
-      // Remove key
-      removeKey() {
-        localStorage.removeItem(this.STORAGE_KEY);
+      // Endpoints
+      endpoints: {
+        chat: '/api/chatbot',
+        status: '/api/chatbot/status'
       }
     };
 
-    // Initialize with pre-configured key (force reset for new key)
-    (function initializeSecureKey() {
-      // Force reset to apply new API key
-      SecureKeyManager.removeKey();
-
-      // API key - will be encoded and stored in localStorage
-      const apiKey = 'AIzaSyDHvF7SmlIg--C0Qtker51_pcjGz0ZFyt8';
-      SecureKeyManager.setKey(apiKey);
-      console.log('🔐 API Key securely stored in localStorage');
-    })();
-
-    // Gemini AI Configuration
-    const GEMINI_CONFIG = {
-      get apiKey() {
-        return SecureKeyManager.getKey();
-      },
-      apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-
-      // System prompt untuk GOPOS
-      systemPrompt: `Kamu adalah GOPOS Bot (GO-LANG POS ASSISTANT), asisten virtual resmi PT Pos Indonesia.
-    
-Tugas utamamu:
-1. Membantu cek resi pengiriman
-2. Memberikan estimasi ongkos kirim
-3. Mencari kantor pos terdekat
-4. Menjawab pertanyaan seputar layanan Pos Indonesia
-
-Gaya komunikasi:
-- Ramah dan profesional
-- Gunakan bahasa Indonesia yang baik
-- Gunakan emoji secukupnya
-- Jawaban singkat dan informatif (maksimal 3-4 paragraf)
-- Jika diminta cek resi, berikan format demo karena ini adalah demo mode
-
-Layanan Pos Indonesia yang tersedia:
-- Pos Express: Layanan tercepat, H+1 untuk kota besar
-- Pos Kilat Khusus: Cepat dan ekonomis, 2-3 hari
-- Pos Reguler: Hemat, 5-7 hari
-- Pos Internasional: Pengiriman ke luar negeri
-
-Jika ada pertanyaan di luar layanan Pos Indonesia, arahkan dengan sopan ke topik yang relevan.`
-    };
-
     // Simpan riwayat percakapan
-    let geminiConversationHistory = [];
+    let chatConversationHistory = [];
 
-    // Fungsi untuk generate response dari Gemini menggunakan REST API
-    async function generateGeminiResponse(userMessage) {
+    // Fungsi untuk generate response via backend proxy
+    async function generateChatbotResponse(userMessage) {
       try {
         // Tambah pesan user ke history
-        geminiConversationHistory.push({
+        chatConversationHistory.push({
           role: 'user',
           parts: [{ text: userMessage }]
         });
 
         // Buat payload untuk API
         const payload = {
-          contents: [
-            // System instruction
-            {
-              role: 'user',
-              parts: [{ text: GEMINI_CONFIG.systemPrompt }]
-            },
-            {
-              role: 'model',
-              parts: [{ text: 'Baik, saya mengerti. Saya adalah GOPOS Bot, asisten virtual resmi PT Pos Indonesia. Saya siap membantu Anda!' }]
-            },
-            // Conversation history
-            ...geminiConversationHistory
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
+          message: userMessage,
+          history: chatConversationHistory.slice(-20) // Keep last 20 messages
         };
 
-        // Kirim request ke Gemini REST API
-        const response = await fetch(`${GEMINI_CONFIG.apiUrl}?key=${GEMINI_CONFIG.apiKey}`, {
+        // Kirim request ke backend proxy
+        const response = await fetch(`${CHATBOT_CONFIG.apiUrl}${CHATBOT_CONFIG.endpoints.chat}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -684,51 +590,74 @@ Jika ada pertanyaan di luar layanan Pos Indonesia, arahkan dengan sopan ke topik
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Gemini API Error:', errorData);
-          throw new Error(errorData.error?.message || 'API request failed');
+          console.error('Chatbot API Error:', errorData);
+          throw new Error(errorData.error || 'API request failed');
         }
 
         const data = await response.json();
 
         // Extract response text
-        const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text ||
-          'Maaf, saya tidak dapat memproses permintaan Anda saat ini.';
+        const botResponse = data.response || 'Maaf, saya tidak dapat memproses permintaan Anda saat ini.';
+        const source = data.source || 'unknown';
+
+        console.log(`📮 GOPOS Response (source: ${source})`);
 
         // Tambah response bot ke history
-        geminiConversationHistory.push({
+        chatConversationHistory.push({
           role: 'model',
           parts: [{ text: botResponse }]
         });
 
-        // Batasi history agar tidak terlalu panjang (keep last 10 exchanges)
-        if (geminiConversationHistory.length > 20) {
-          geminiConversationHistory = geminiConversationHistory.slice(-20);
+        // Batasi history agar tidak terlalu panjang
+        if (chatConversationHistory.length > 20) {
+          chatConversationHistory = chatConversationHistory.slice(-20);
         }
 
         return botResponse;
       } catch (error) {
-        console.error('Gemini API Error:', error);
+        console.error('Chatbot API Error:', error);
         // Remove the failed user message from history
-        geminiConversationHistory.pop();
-        return `Maaf, terjadi kesalahan saat memproses pesan Anda. 😔\n\nError: ${error.message}\n\nSilakan coba lagi atau hubungi kami via WhatsApp untuk bantuan langsung.`;
+        chatConversationHistory.pop();
+        throw error; // Re-throw to trigger fallback in ChatbotDemo
       }
     }
 
     // Reset conversation
-    function resetGeminiConversation() {
-      geminiConversationHistory = [];
-      console.log('🔄 Gemini conversation reset');
+    function resetChatConversation() {
+      chatConversationHistory = [];
+      console.log('🔄 Chatbot conversation reset');
+    }
+
+    // Check chatbot status
+    async function checkChatbotStatus() {
+      try {
+        const response = await fetch(`${CHATBOT_CONFIG.apiUrl}${CHATBOT_CONFIG.endpoints.status}`);
+        if (response.ok) {
+          const status = await response.json();
+          console.log('📮 GOPOS Chatbot Status:', status);
+          return status;
+        }
+      } catch (error) {
+        console.warn('Could not check chatbot status:', error.message);
+      }
+      return null;
     }
 
     // Expose to window for ChatbotDemo integration
     window.GeminiChatbot = {
-      generateResponse: generateGeminiResponse,
-      resetConversation: resetGeminiConversation,
+      generateResponse: generateChatbotResponse,
+      resetConversation: resetChatConversation,
+      checkStatus: checkChatbotStatus,
       isReady: true
     };
 
-    console.log('🤖 Gemini AI Chatbot (REST API) initialized successfully!');
+    console.log('🤖 GOPOS Chatbot (Backend Proxy) initialized!');
+    console.log('🔒 API key is securely stored on backend');
+
+    // Check status on load
+    checkChatbotStatus();
   </script>
+
 
   <!-- Service Worker Registration -->
   <script>
