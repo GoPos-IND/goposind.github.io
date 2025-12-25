@@ -138,14 +138,13 @@ const UserManagement = {
         if (!tbody) return;
 
         if (!this.users || this.users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Belum ada user terdaftar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-row">Belum ada user terdaftar</td></tr>';
             return;
         }
 
         tbody.innerHTML = this.users.map(user => `
             <tr data-id="${user.id}">
                 <td><strong>${user.name || '-'}</strong></td>
-                <td>${user.phonenumber || '-'}</td>
                 <td>${user.email || '-'}</td>
                 <td><span class="badge badge-${user.role === 'admin' ? 'primary' : 'secondary'}">${user.role || 'user'}</span></td>
                 <td><span class="badge badge-${user.status === 'active' ? 'success' : 'warning'}">${user.status || 'active'}</span></td>
@@ -178,8 +177,7 @@ const UserManagement = {
             title: 'Tambah User Baru',
             html: `
                 <input type="text" id="swal-name" class="swal2-input" placeholder="Nama Lengkap">
-                <input type="text" id="swal-phone" class="swal2-input" placeholder="Nomor Telepon">
-                <input type="email" id="swal-email" class="swal2-input" placeholder="Email (opsional)">
+                <input type="email" id="swal-email" class="swal2-input" placeholder="Email">
                 <select id="swal-role" class="swal2-select">
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -190,14 +188,13 @@ const UserManagement = {
             cancelButtonText: 'Batal',
             preConfirm: () => ({
                 name: document.getElementById('swal-name').value,
-                phonenumber: document.getElementById('swal-phone').value,
                 email: document.getElementById('swal-email').value,
                 role: document.getElementById('swal-role').value,
                 status: 'active'
             })
         });
 
-        if (result.isConfirmed && result.value.name && result.value.phonenumber) {
+        if (result.isConfirmed && result.value.name && result.value.email) {
             await this.createUser(result.value);
         }
     },
@@ -232,7 +229,6 @@ const UserManagement = {
             title: 'Edit User',
             html: `
                 <input type="text" id="swal-name" class="swal2-input" placeholder="Nama" value="${user.name || ''}">
-                <input type="text" id="swal-phone" class="swal2-input" placeholder="Phone" value="${user.phonenumber || ''}">
                 <input type="email" id="swal-email" class="swal2-input" placeholder="Email" value="${user.email || ''}">
                 <select id="swal-role" class="swal2-select">
                     <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
@@ -248,7 +244,6 @@ const UserManagement = {
             cancelButtonText: 'Batal',
             preConfirm: () => ({
                 name: document.getElementById('swal-name').value,
-                phonenumber: document.getElementById('swal-phone').value,
                 email: document.getElementById('swal-email').value,
                 role: document.getElementById('swal-role').value,
                 status: document.getElementById('swal-status').value

@@ -180,10 +180,10 @@ const FormManager = {
 
     async handleLogin(e) {
         e.preventDefault();
-        const phone = document.getElementById('loginEmail').value; // Using email field for phone
+        const email = document.getElementById('loginEmail').value;
 
-        if (!phone) {
-            Toast.show('Masukkan nomor telepon Anda', 'error');
+        if (!email) {
+            Toast.show('Masukkan email Anda', 'error');
             return;
         }
 
@@ -193,18 +193,21 @@ const FormManager = {
             const response = await fetch(`${CONFIG.apiUrl}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phonenumber: phone })
+                body: JSON.stringify({ email: email })
             });
 
             const data = await response.json();
             Swal.close();
 
             if (data.status && data.token) {
-                UserManager.login(data.token, { phonenumber: phone });
+                UserManager.login(data.token, { email: email });
+                // Close modal FIRST, then show alert
                 ModalManager.close('loginModal');
-                Alert.success('Berhasil!', 'Anda telah berhasil login.');
+                setTimeout(() => {
+                    Alert.success('Berhasil!', 'Anda telah berhasil login.');
+                }, 200);
             } else {
-                Alert.error('Gagal Login', data.message || 'Nomor telepon tidak ditemukan.');
+                Alert.error('Gagal Login', data.message || 'Email tidak ditemukan.');
             }
         } catch (error) {
             Swal.close();
@@ -216,9 +219,9 @@ const FormManager = {
     async handleRegister(e) {
         e.preventDefault();
         const name = document.getElementById('registerName').value;
-        const phone = document.getElementById('registerEmail').value; // Using email field for phone
+        const email = document.getElementById('registerEmail').value;
 
-        if (!name || !phone) {
+        if (!name || !email) {
             Toast.show('Lengkapi semua field', 'error');
             return;
         }
@@ -231,7 +234,7 @@ const FormManager = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name,
-                    phonenumber: phone,
+                    email: email,
                     role: 'user',
                     status: 'active'
                 })
@@ -241,9 +244,13 @@ const FormManager = {
             Swal.close();
 
             if (data.status) {
+                // Close modal FIRST
                 ModalManager.close('registerModal');
-                Alert.success('Berhasil!', 'Akun berhasil dibuat. Silakan login.');
-                ModalManager.open('loginModal');
+                // Wait for modal to close, then show alert
+                setTimeout(async () => {
+                    await Alert.success('Berhasil!', 'Akun berhasil dibuat. Silakan login.');
+                    ModalManager.open('loginModal');
+                }, 200);
             } else {
                 Alert.error('Gagal Daftar', data.message || 'Gagal membuat akun.');
             }

@@ -243,27 +243,89 @@ const ChatManager = {
         this.scrollToBottom();
     },
 
-    appendMessage(role, content) {
+    async appendMessage(role, content, animate = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message message-${role}`;
 
         const avatar = role === 'user' ? '👤' : '📮';
+        const avatarTitle = role === 'user' ? 'Anda' : 'GOPOS AI';
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
 
-        messageDiv.innerHTML = `
-            <div class="message-avatar">${avatar}</div>
-            <div class="message-content">${this.formatMessage(content)}</div>
-        `;
-
+        messageDiv.innerHTML = `<div class="message-avatar" title="${avatarTitle}">${avatar}</div>`;
+        messageDiv.appendChild(contentDiv);
         this.messagesContainer.appendChild(messageDiv);
+
+        if (animate && role === 'bot') {
+            // Typewriter effect for bot messages - wait for it to complete
+            await this.typeWriter(contentDiv, content);
+        } else {
+            contentDiv.innerHTML = this.formatMessage(content);
+        }
+    },
+
+    async typeWriter(element, text) {
+        element.classList.add('typing');
+
+        // Split text into words for word-by-word animation like Gemini
+        const words = text.split(/(\s+)/);
+        let currentText = '';
+        let wordIndex = 0;
+
+        // Calculate dynamic speed based on text length
+        const baseSpeed = 30; // ms per word
+        const minSpeed = 15;
+        const speed = Math.max(minSpeed, baseSpeed - Math.floor(words.length / 10));
+
+        return new Promise(resolve => {
+            const addWord = () => {
+                if (wordIndex < words.length) {
+                    currentText += words[wordIndex];
+                    element.innerHTML = this.formatMessage(currentText);
+                    wordIndex++;
+                    this.scrollToBottom();
+
+                    // Variable speed - faster for spaces, slower for words
+                    const nextDelay = words[wordIndex - 1].trim() === '' ? speed / 3 : speed;
+                    setTimeout(addWord, nextDelay);
+                } else {
+                    // Done typing
+                    element.classList.remove('typing');
+                    element.innerHTML = this.formatMessage(text);
+                    resolve();
+                }
+            };
+
+            // Start animation
+            addWord();
+        });
     },
 
     formatMessage(content) {
-        // Basic markdown-like formatting
-        return content
-            .replace(/\n/g, '<br>')
+        if (!content) return '';
+
+        // Enhanced markdown-like formatting
+        let formatted = content
+            // Escape HTML first
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            // Code blocks (```)
+            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+            // Inline code (`)
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            // Bold (**)
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/• /g, '<br>• ');
+            // Italic (*)
+            .replace(/\*([^\*]+)\*/g, '<em>$1</em>')
+            // Bullet points
+            .replace(/^• /gm, '<span class="bullet">•</span> ')
+            .replace(/^- /gm, '<span class="bullet">•</span> ')
+            // Numbered lists
+            .replace(/^(\d+)\. /gm, '<span class="number">$1.</span> ')
+            // Line breaks
+            .replace(/\n/g, '<br>');
+
+        return formatted;
     },
 
     showTyping() {
@@ -274,10 +336,11 @@ const ChatManager = {
         typingDiv.className = 'message message-bot';
         typingDiv.id = 'typingIndicator';
         typingDiv.innerHTML = `
-            <div class="message-avatar">📮</div>
+            <div class="message-avatar" title="GOPOS AI">📮</div>
             <div class="message-content">
                 <div class="typing-indicator">
                     <span></span><span></span><span></span>
+                    <span class="typing-text">GOPOS AI sedang mengetik...</span>
                 </div>
             </div>
         `;
@@ -377,8 +440,12 @@ const ChatManager = {
                 sessionStorage.setItem('gopos-chat-messages', JSON.stringify(this.messages));
             }
 
-            // Display bot response
-            this.appendMessage('bot', botResponse);
+            // Display bot response with animation and wait for it to complete
+            await this.appendMessage('bot', botResponse, true);
+
+            // Show follow-up suggestions AFTER typing animation is done
+            this.showFollowUpSuggestions(text, botResponse);
+
             this.scrollToBottom();
             this.renderHistorySidebar();
 
@@ -427,6 +494,80 @@ const ChatManager = {
         } catch (error) {
             console.error('Failed to clear history:', error);
         }
+    },
+
+    showFollowUpSuggestions(userMessage, botResponse) {
+        // Remove existing suggestions
+        const existingSuggestions = this.messagesContainer.querySelector('.follow-up-suggestions');
+        if (existingSuggestions) {
+            existingSuggestions.remove();
+        }
+
+        // Generate contextual suggestions based on the conversation
+        const suggestions = this.generateSuggestions(userMessage, botResponse);
+
+        if (suggestions.length === 0) return;
+
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.className = 'follow-up-suggestions';
+        suggestionsDiv.innerHTML = suggestions.map(suggestion =>
+            `<button class="follow-up-chip" data-prompt="${this.escapeHtml(suggestion)}">${this.escapeHtml(suggestion)}</button>`
+        ).join('');
+
+        this.messagesContainer.appendChild(suggestionsDiv);
+
+        // Add click handlers
+        suggestionsDiv.querySelectorAll('.follow-up-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const prompt = chip.dataset.prompt;
+                this.input.value = prompt;
+                this.sendBtn.disabled = false;
+                suggestionsDiv.remove();
+                this.sendMessage();
+            });
+        });
+    },
+
+    generateSuggestions(userMessage, botResponse) {
+        const suggestions = [];
+        const lowerMessage = userMessage.toLowerCase();
+        const lowerResponse = botResponse.toLowerCase();
+
+        // Ongkir related
+        if (lowerMessage.includes('ongkir') || lowerMessage.includes('tarif') || lowerResponse.includes('ongkir')) {
+            suggestions.push('Berapa estimasi waktu pengirimannya?');
+            suggestions.push('Apa perbedaan layanan Pos Kilat dan Pos Express?');
+            if (!lowerMessage.includes('jakarta')) {
+                suggestions.push('Berapa ongkir dari Jakarta ke Bandung 2kg?');
+            }
+        }
+        // Kantor pos related
+        else if (lowerMessage.includes('kantor pos') || lowerMessage.includes('lokasi') || lowerResponse.includes('kantor pos')) {
+            suggestions.push('Jam operasional kantor pos?');
+            suggestions.push('Layanan apa saja yang tersedia?');
+            suggestions.push('Apakah bisa ambil paket di kantor pos?');
+        }
+        // Layanan related
+        else if (lowerMessage.includes('layanan') || lowerResponse.includes('layanan')) {
+            suggestions.push('Berapa tarif masing-masing layanan?');
+            suggestions.push('Mana yang paling cepat sampai?');
+            suggestions.push('Apakah ada layanan same day?');
+        }
+        // Syarat related
+        else if (lowerMessage.includes('syarat') || lowerResponse.includes('syarat') || lowerResponse.includes('ketentuan')) {
+            suggestions.push('Bagaimana cara packing yang benar?');
+            suggestions.push('Berapa berat maksimal yang bisa dikirim?');
+            suggestions.push('Dokumen apa saja yang diperlukan?');
+        }
+        // Default suggestions
+        else {
+            suggestions.push('Berapa ongkir dari Jakarta ke Surabaya?');
+            suggestions.push('Di mana kantor pos terdekat?');
+            suggestions.push('Apa saja layanan Pos Indonesia?');
+        }
+
+        // Limit to 3 suggestions
+        return suggestions.slice(0, 3);
     },
 
     renderHistorySidebar() {
