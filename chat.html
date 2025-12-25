@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOPOS Chat - Asisten Virtual PT Pos Indonesia">
+    <title>GOPOS Chat - AI Assistant</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="Assets/favicon.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="chat.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">📮</div>
+                <span class="logo-text">GOPOS</span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+
+        <button class="new-chat-btn" id="newChatBtn">
+            <span>➕</span> Chat Baru
+        </button>
+
+        <div class="chat-history" id="chatHistory">
+            <div class="history-section">
+                <h4>Hari Ini</h4>
+                <div class="history-list" id="todayHistory">
+                    <!-- Chat history items will be rendered here -->
+                </div>
+            </div>
+            <div class="history-section">
+                <h4>Sebelumnya</h4>
+                <div class="history-list" id="previousHistory">
+                    <!-- Older chat history -->
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info" id="userInfo">
+                <span class="user-avatar">👤</span>
+                <span class="user-name" id="sidebarUserName">Guest</span>
+            </div>
+            <div class="sidebar-actions">
+                <button class="icon-btn" id="themeToggle" title="Ganti Tema">🌙</button>
+                <a href="index.html" class="icon-btn" title="Kembali">🏠</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="main-content" id="mainContent">
+        <!-- Chat Header (Mobile) -->
+        <header class="chat-header">
+            <button class="menu-btn" id="menuBtn">☰</button>
+            <h1>GOPOS AI</h1>
+            <button class="theme-btn" id="themeBtn">🌙</button>
+        </header>
+
+        <!-- Welcome Screen (shown when no messages) -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-content">
+                <div class="welcome-icon">📮</div>
+                <h1>GOPOS AI Assistant</h1>
+                <p>Asisten virtual cerdas untuk layanan PT Pos Indonesia</p>
+
+                <div class="suggestion-cards">
+                    <div class="suggestion-card" data-prompt="Berapa ongkir dari Jakarta ke Surabaya 3kg?">
+                        <span class="card-icon">💰</span>
+                        <span class="card-title">Cek Ongkir</span>
+                        <span class="card-desc">Jakarta ke Surabaya 3kg</span>
+                    </div>
+                    <div class="suggestion-card" data-prompt="Dimana kantor pos terdekat di Bandung?">
+                        <span class="card-icon">📍</span>
+                        <span class="card-title">Cari Kantor Pos</span>
+                        <span class="card-desc">Lokasi terdekat</span>
+                    </div>
+                    <div class="suggestion-card" data-prompt="Apa saja layanan pengiriman Pos Indonesia?">
+                        <span class="card-icon">📦</span>
+                        <span class="card-title">Layanan Pos</span>
+                        <span class="card-desc">Info pengiriman</span>
+                    </div>
+                    <div class="suggestion-card" data-prompt="Bagaimana cara melacak paket?">
+                        <span class="card-icon">🔍</span>
+                        <span class="card-title">Lacak Paket</span>
+                        <span class="card-desc">Cek status kiriman</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be rendered here -->
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" placeholder="Ketik pesan..." rows="1" autocomplete="off"></textarea>
+                <button class="send-btn" id="sendBtn" disabled>
+                    <span>➤</span>
+                </button>
+            </div>
+            <p class="input-hint">GOPOS dapat membuat kesalahan. Periksa informasi penting.</p>
+        </div>
+    </main>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <script src="chat.js"></script>
+</body>
+
+</html>

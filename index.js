@@ -7,6 +7,7 @@ const CONFIG = {
     whatsappMessage: 'Halo GOPOS! Saya ingin bertanya tentang layanan Pos Indonesia.',
     animationDelay: 100,
     counterDuration: 2000,
+    apiUrl: 'https://asia-southeast2-proyek3-smz.cloudfunctions.net/GoPosInd'
 };
 
 // ===== Theme Management =====
@@ -26,8 +27,6 @@ const ThemeManager = {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         this.setTheme(newTheme);
-
-        // Show toast notification
         Toast.show(
             newTheme === 'dark' ? '🌙 Mode Gelap Aktif' : '☀️ Mode Terang Aktif',
             'success'
@@ -45,14 +44,8 @@ const ThemeManager = {
 // ===== Toast Notifications (using SweetAlert2) =====
 const Toast = {
     show(message, type = 'info') {
-        const iconMap = {
-            success: 'success',
-            error: 'error',
-            warning: 'warning',
-            info: 'info'
-        };
-
-        const Toast = Swal.mixin({
+        const iconMap = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
+        const ToastMixin = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
@@ -63,11 +56,7 @@ const Toast = {
                 toast.addEventListener('mouseleave', Swal.resumeTimer);
             }
         });
-
-        Toast.fire({
-            icon: iconMap[type] || 'info',
-            title: message
-        });
+        ToastMixin.fire({ icon: iconMap[type] || 'info', title: message });
     }
 };
 
@@ -75,54 +64,25 @@ const Toast = {
 const Alert = {
     success(title, message) {
         return Swal.fire({
-            icon: 'success',
-            title: title,
-            text: message,
-            confirmButtonText: 'OK',
-            customClass: {
-                popup: 'swal-custom-popup',
-                confirmButton: 'btn btn-primary'
-            }
+            icon: 'success', title: title, text: message, confirmButtonText: 'OK',
+            customClass: { popup: 'swal-custom-popup', confirmButton: 'btn btn-primary' }
         });
     },
-
     error(title, message) {
         return Swal.fire({
-            icon: 'error',
-            title: title,
-            text: message,
-            confirmButtonText: 'OK',
-            customClass: {
-                popup: 'swal-custom-popup',
-                confirmButton: 'btn btn-primary'
-            }
+            icon: 'error', title: title, text: message, confirmButtonText: 'OK',
+            customClass: { popup: 'swal-custom-popup', confirmButton: 'btn btn-primary' }
         });
     },
-
     confirm(title, message) {
         return Swal.fire({
-            icon: 'question',
-            title: title,
-            text: message,
-            showCancelButton: true,
-            confirmButtonText: 'Ya',
-            cancelButtonText: 'Batal',
-            customClass: {
-                popup: 'swal-custom-popup',
-                confirmButton: 'btn btn-primary',
-                cancelButton: 'btn btn-secondary'
-            }
+            icon: 'question', title: title, text: message, showCancelButton: true,
+            confirmButtonText: 'Ya', cancelButtonText: 'Batal',
+            customClass: { popup: 'swal-custom-popup', confirmButton: 'btn btn-primary', cancelButton: 'btn btn-secondary' }
         });
     },
-
     loading(title = 'Memproses...') {
-        return Swal.fire({
-            title: title,
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+        return Swal.fire({ title: title, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     }
 };
 
@@ -132,17 +92,10 @@ const NavbarManager = {
         this.navbar = document.querySelector('.navbar');
         this.bindEvents();
     },
-
-    bindEvents() {
-        window.addEventListener('scroll', () => this.handleScroll());
-    },
-
+    bindEvents() { window.addEventListener('scroll', () => this.handleScroll()); },
     handleScroll() {
-        if (window.scrollY > 50) {
-            this.navbar.classList.add('scrolled');
-        } else {
-            this.navbar.classList.remove('scrolled');
-        }
+        if (window.scrollY > 50) { this.navbar.classList.add('scrolled'); }
+        else { this.navbar.classList.remove('scrolled'); }
     }
 };
 
@@ -154,31 +107,14 @@ const MobileMenuManager = {
         this.closeBtn = document.getElementById('mobileMenuClose');
         this.bindEvents();
     },
-
     bindEvents() {
-        if (this.openBtn) {
-            this.openBtn.addEventListener('click', () => this.open());
-        }
-        if (this.closeBtn) {
-            this.closeBtn.addEventListener('click', () => this.close());
-        }
-
-        // Close on link click
+        if (this.openBtn) this.openBtn.addEventListener('click', () => this.open());
+        if (this.closeBtn) this.closeBtn.addEventListener('click', () => this.close());
         const links = this.menu?.querySelectorAll('a');
-        links?.forEach(link => {
-            link.addEventListener('click', () => this.close());
-        });
+        links?.forEach(link => link.addEventListener('click', () => this.close()));
     },
-
-    open() {
-        this.menu?.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    },
-
-    close() {
-        this.menu?.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    open() { this.menu?.classList.add('active'); document.body.style.overflow = 'hidden'; },
+    close() { this.menu?.classList.remove('active'); document.body.style.overflow = ''; }
 };
 
 // ===== Modal Management =====
@@ -187,71 +123,241 @@ const ModalManager = {
         this.modals = document.querySelectorAll('.modal-overlay');
         this.bindEvents();
     },
-
     bindEvents() {
-        // Modal functionality removed - login/register features disabled
-
-        // Close buttons
         this.modals.forEach(modal => {
             const closeBtn = modal.querySelector('.modal-close');
             closeBtn?.addEventListener('click', () => this.close(modal.id));
-
-            // Close on backdrop click
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.close(modal.id);
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) this.close(modal.id); });
         });
-
-        // Modal links (switch between modals)
         document.querySelectorAll('[data-modal]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetModal = link.dataset.modal;
                 this.modals.forEach(m => m.classList.remove('active'));
-                this.open(targetModal);
+                this.open(link.dataset.modal);
             });
         });
-
-        // ESC key to close
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.modals.forEach(modal => {
-                    if (modal.classList.contains('active')) {
-                        this.close(modal.id);
-                    }
-                });
-            }
+            if (e.key === 'Escape') this.modals.forEach(modal => { if (modal.classList.contains('active')) this.close(modal.id); });
+        });
+    },
+    open(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    },
+    close(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
+    }
+};
+
+// ===== Form Handling =====
+const FormManager = {
+    init() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        // Login form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+
+        // Register form
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
+
+        // Password toggles
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.target.closest('.password-input').querySelector('input');
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
         });
     },
 
-    open(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+    async handleLogin(e) {
+        e.preventDefault();
+        const phone = document.getElementById('loginEmail').value; // Using email field for phone
+
+        if (!phone) {
+            Toast.show('Masukkan nomor telepon Anda', 'error');
+            return;
+        }
+
+        Alert.loading('Memproses login...');
+
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phonenumber: phone })
+            });
+
+            const data = await response.json();
+            Swal.close();
+
+            if (data.status && data.token) {
+                UserManager.login(data.token, { phonenumber: phone });
+                ModalManager.close('loginModal');
+                Alert.success('Berhasil!', 'Anda telah berhasil login.');
+            } else {
+                Alert.error('Gagal Login', data.message || 'Nomor telepon tidak ditemukan.');
+            }
+        } catch (error) {
+            Swal.close();
+            Alert.error('Error', 'Gagal menghubungi server. Silakan coba lagi.');
+            console.error('Login error:', error);
         }
     },
 
-    close(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
+    async handleRegister(e) {
+        e.preventDefault();
+        const name = document.getElementById('registerName').value;
+        const phone = document.getElementById('registerEmail').value; // Using email field for phone
+
+        if (!name || !phone) {
+            Toast.show('Lengkapi semua field', 'error');
+            return;
+        }
+
+        Alert.loading('Mendaftarkan akun...');
+
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    phonenumber: phone,
+                    role: 'user',
+                    status: 'active'
+                })
+            });
+
+            const data = await response.json();
+            Swal.close();
+
+            if (data.status) {
+                ModalManager.close('registerModal');
+                Alert.success('Berhasil!', 'Akun berhasil dibuat. Silakan login.');
+                ModalManager.open('loginModal');
+            } else {
+                Alert.error('Gagal Daftar', data.message || 'Gagal membuat akun.');
+            }
+        } catch (error) {
+            Swal.close();
+            Alert.error('Error', 'Gagal menghubungi server. Silakan coba lagi.');
+            console.error('Register error:', error);
         }
     }
 };
 
-// ===== Form Handling (Disabled - Login/Register removed) =====
-const FormManager = {
-    init() {
-        // Login/Register features have been removed
-    }
-};
-
-// ===== User Management (Disabled - Login/Register removed) =====
+// ===== User Management =====
 const UserManager = {
+    isLoggedIn: false,
+    token: null,
+    currentUser: null,
+
     init() {
-        // User management features have been removed
+        this.checkAuth();
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        // User dropdown toggle
+        const userBtn = document.getElementById('userBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userBtn && userDropdown) {
+            userBtn.addEventListener('click', () => {
+                userDropdown.classList.toggle('active');
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.user-menu')) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        }
+    },
+
+    checkAuth() {
+        const token = localStorage.getItem('gopos-token');
+        const userData = localStorage.getItem('gopos-user');
+
+        if (token && userData) {
+            this.token = token;
+            this.currentUser = JSON.parse(userData);
+            this.isLoggedIn = true;
+            this.updateUI();
+            this.loadUserProfile();
+        }
+    },
+
+    async loadUserProfile() {
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/api/user/me`, {
+                headers: { 'Authorization': this.token }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                this.currentUser = user;
+                localStorage.setItem('gopos-user', JSON.stringify(user));
+                this.updateUI();
+            }
+        } catch (error) {
+            console.error('Failed to load user profile:', error);
+        }
+    },
+
+    login(token, user) {
+        this.token = token;
+        this.currentUser = user;
+        this.isLoggedIn = true;
+
+        localStorage.setItem('gopos-token', token);
+        localStorage.setItem('gopos-user', JSON.stringify(user));
+
+        this.updateUI();
+        this.loadUserProfile();
+    },
+
+    logout() {
+        this.token = null;
+        this.currentUser = null;
+        this.isLoggedIn = false;
+
+        localStorage.removeItem('gopos-token');
+        localStorage.removeItem('gopos-user');
+
+        this.updateUI();
+        Toast.show('Anda telah logout', 'success');
+    },
+
+    updateUI() {
+        const loginBtn = document.getElementById('loginBtn');
+        const userMenu = document.getElementById('userMenu');
+        const userName = document.getElementById('userName');
+
+        if (this.isLoggedIn) {
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (userMenu) userMenu.style.display = 'flex';
+            if (userName && this.currentUser) {
+                userName.textContent = this.currentUser.name || this.currentUser.phonenumber || 'User';
+            }
+        } else {
+            if (loginBtn) loginBtn.style.display = 'flex';
+            if (userMenu) userMenu.style.display = 'none';
+        }
+    },
+
+    getAuthHeader() {
+        return this.token ? { 'Authorization': this.token } : {};
     }
 };
 

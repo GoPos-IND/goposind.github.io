@@ -59,10 +59,27 @@
           <span class="icon-moon">🌙</span>
         </button>
 
-        <!-- WhatsApp Button -->
-        <button class="btn btn-whatsapp" id="whatsappBtn">
-          <span>💬</span> Chat WhatsApp
+        <!-- Login Button (visible when not logged in) -->
+        <button class="btn btn-secondary" id="loginBtn" onclick="ModalManager.open('loginModal')">
+          <span>👤</span> Masuk
         </button>
+
+        <!-- User Menu (visible when logged in) -->
+        <div class="user-menu" id="userMenu" style="display: none;">
+          <button class="btn btn-secondary user-btn" id="userBtn">
+            <span>👤</span> <span id="userName">User</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="chat.html" class="dropdown-item">💬 Chat AI</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <button class="dropdown-item" onclick="UserManager.logout()">🚪 Keluar</button>
+          </div>
+        </div>
+
+        <!-- WhatsApp Button -->
+        <!-- <button class="btn btn-whatsapp" id="whatsappBtn">
+          <span>💬</span> Chat WhatsApp
+        </button> -->
       </div>
 
       <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
@@ -91,13 +108,13 @@
           Layanan <span class="highlight">POS Indonesia</span> dalam Genggaman
         </h1>
         <p>
-          GOPOS adalah chatbot WhatsApp cerdas untuk membantu Anda cek ongkir,
+          GOPOS adalah asisten AI cerdas untuk membantu Anda cek ongkir,
           cari kantor pos terdekat, dan informasi layanan PT Pos Indonesia lainnya 24/7.
         </p>
         <div class="hero-buttons">
-          <button class="btn btn-whatsapp btn-lg" id="heroWhatsappBtn">
-            <span>💬</span> Chat via WhatsApp
-          </button>
+          <a href="chat.html" class="btn btn-primary btn-lg">
+            <span>🤖</span> Chat dengan AI
+          </a>
           <a href="#features" class="btn btn-secondary btn-lg">
             Pelajari Fitur
           </a>
@@ -298,9 +315,9 @@
       <div class="cta-box reveal">
         <h2>Siap Mencoba GOPOS?</h2>
         <p>Mulai chat dengan GOPOS sekarang dan rasakan kemudahan akses layanan Pos Indonesia!</p>
-        <button class="btn btn-lg" id="ctaWhatsappBtn">
-          💬 Mulai Chat Sekarang
-        </button>
+        <a href="chat.html" class="btn btn-lg">
+          🤖 Mulai Chat dengan AI
+        </a>
       </div>
     </div>
   </section>
@@ -476,24 +493,24 @@
       </form>
     </div>
   </div>
-  <!-- Chatbot Demo Widget -->
+  <!-- Chatbot Demo Widget
   <div class="chatbot-demo" id="chatbotDemo">
     <button class="chatbot-toggle" id="chatbotToggle">
       <span class="chatbot-icon">🤖</span>
       <span class="chatbot-close">✕</span>
     </button>
     <div class="chatbot-window" id="chatbotWindow">
-      <!-- Resize handle at top-left corner -->
-      <div class="chatbot-resize-handle" id="chatbotResizeHandle" title="Drag untuk resize"></div>
+      <-- Resize handle at top-left corner -->
+  <!-- <div class="chatbot-resize-handle" id="chatbotResizeHandle" title="Drag untuk resize"></div>
 
       <div class="chatbot-header">
         <div class="chatbot-avatar">📮</div>
         <div class="chatbot-title">
           <strong>GOPOS Bot</strong>
           <span>Online • AI Mode</span>
-        </div>
-        <!-- Size control buttons -->
-        <div class="chatbot-size-controls">
+        </div> -->
+  <!-- Size control buttons -->
+  <!-- <div class="chatbot-size-controls">
           <button class="chatbot-size-btn" id="sizeSmall" title="Kecil">S</button>
           <button class="chatbot-size-btn" id="sizeMedium" title="Sedang">M</button>
           <button class="chatbot-size-btn" id="sizeLarge" title="Besar">L</button>
@@ -522,7 +539,7 @@
         <button class="suggestion-btn" data-msg="Layanan pos indonesia">🚚 Info Layanan</button>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <script src="index.js"></script>
 

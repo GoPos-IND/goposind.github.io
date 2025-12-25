@@ -1,5 +1,9 @@
-// ===== GOPOS Admin Dashboard =====
-// JavaScript for Dashboard Functionality
+// ===== GOPOS Admin Dashboard - User Management =====
+
+const CONFIG = {
+    apiUrl: 'https://asia-southeast2-proyek3-smz.cloudfunctions.net/GoPosInd',
+    pollingInterval: 5000 // 5 seconds
+};
 
 // ===== Theme Management =====
 const ThemeManager = {
@@ -8,407 +12,317 @@ const ThemeManager = {
         this.setTheme(savedTheme);
         this.bindEvents();
     },
-
     setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('gopos-theme', theme);
     },
-
     toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         this.setTheme(newTheme);
-
-        Toast.show(
-            newTheme === 'dark' ? '🌙 Mode Gelap Aktif' : '☀️ Mode Terang Aktif',
-            'success'
-        );
+        Toast.show(newTheme === 'dark' ? '🌙 Mode Gelap Aktif' : '☀️ Mode Terang Aktif', 'success');
     },
-
     bindEvents() {
         const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => this.toggleTheme());
-        }
+        if (themeToggle) themeToggle.addEventListener('click', () => this.toggleTheme());
     }
 };
 
 // ===== Toast Notifications =====
 const Toast = {
     show(message, type = 'info') {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
+        const ToastMixin = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false,
+            timer: 3000, timerProgressBar: true
         });
-
-        Toast.fire({
-            icon: type,
-            title: message
-        });
+        ToastMixin.fire({ icon: type, title: message });
     }
 };
 
-// ===== Sidebar Management =====
-const SidebarManager = {
+// ===== Auth Manager =====
+const AuthManager = {
+    token: null,
+    user: null,
+
     init() {
-        this.sidebar = document.getElementById('sidebar');
-        this.menuToggle = document.getElementById('menuToggle');
-        this.sidebarToggle = document.getElementById('sidebarToggle');
-        this.overlay = this.createOverlay();
-        this.bindEvents();
-    },
+        this.token = localStorage.getItem('gopos-token');
+        const userData = localStorage.getItem('gopos-user');
+        this.user = userData ? JSON.parse(userData) : null;
 
-    createOverlay() {
-        const overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        overlay.id = 'sidebarOverlay';
-        document.body.appendChild(overlay);
-        return overlay;
-    },
-
-    bindEvents() {
-        this.menuToggle?.addEventListener('click', () => this.toggle());
-        this.sidebarToggle?.addEventListener('click', () => this.close());
-        this.overlay?.addEventListener('click', () => this.close());
-
-        // Close on window resize if open
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 1024) {
-                this.close();
-            }
-        });
-    },
-
-    toggle() {
-        this.sidebar?.classList.toggle('active');
-        this.overlay?.classList.toggle('active');
-    },
-
-    close() {
-        this.sidebar?.classList.remove('active');
-        this.overlay?.classList.remove('active');
-    }
-};
-
-// ===== Profile Dropdown =====
-const ProfileDropdown = {
-    init() {
-        this.profile = document.getElementById('userProfile');
-        this.dropdown = document.getElementById('profileDropdown');
-        this.bindEvents();
-    },
-
-    bindEvents() {
-        this.profile?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggle();
-        });
-
-        document.addEventListener('click', () => this.close());
-
-        // Logout
-        document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const result = await Swal.fire({
-                icon: 'question',
-                title: 'Keluar?',
-                text: 'Apakah Anda yakin ingin keluar?',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal'
-            });
-
-            if (result.isConfirmed) {
-                localStorage.removeItem('gopos-user');
-                Toast.show('Berhasil keluar', 'success');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            }
-        });
-    },
-
-    toggle() {
-        this.dropdown?.classList.toggle('active');
-    },
-
-    close() {
-        this.dropdown?.classList.remove('active');
-    }
-};
-
-// ===== Chart Initialization =====
-const ChartManager = {
-    init() {
-        this.initChatChart();
-        this.initQuestionTypeChart();
-        this.bindEvents();
-    },
-
-    bindEvents() {
-        document.getElementById('chatPeriod')?.addEventListener('change', (e) => {
-            this.updateChatChart(parseInt(e.target.value));
-        });
-    },
-
-    initChatChart() {
-        const ctx = document.getElementById('chatChart');
-        if (!ctx) return;
-
-        const data = this.generateChatData(30);
-
-        this.chatChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Chat',
-                    data: data.values,
-                    borderColor: '#1E3A5F',
-                    backgroundColor: 'rgba(30, 58, 95, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: '#1E3A5F',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(30, 58, 95, 0.9)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 12,
-                        cornerRadius: 8,
-                        displayColors: false
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#64748b'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(100, 116, 139, 0.1)'
-                        },
-                        ticks: {
-                            color: '#64748b'
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
-        });
-    },
-
-    initQuestionTypeChart() {
-        const ctx = document.getElementById('questionTypeChart');
-        if (!ctx) return;
-
-        this.questionChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Cek Ongkir', 'Cari Kantor', 'Layanan', 'Lainnya'],
-                datasets: [{
-                    data: [45, 30, 15, 10],
-                    backgroundColor: [
-                        '#1E3A5F',
-                        '#F26522',
-                        '#3B82F6',
-                        '#10B981'
-                    ],
-                    borderWidth: 0,
-                    hoverOffset: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '65%',
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(30, 58, 95, 0.9)',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                }
-            }
-        });
-    },
-
-    generateChatData(days) {
-        const labels = [];
-        const values = [];
-        const today = new Date();
-
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            labels.push(date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
-            values.push(Math.floor(Math.random() * 500) + 200);
+        if (!this.token || !this.user) {
+            this.redirectToLogin();
+            return false;
         }
 
-        return { labels, values };
+        // Check if user is admin
+        if (this.user.role !== 'admin') {
+            Toast.show('Akses ditolak. Hanya admin yang bisa mengakses halaman ini.', 'error');
+            setTimeout(() => window.location.href = 'index.html', 2000);
+            return false;
+        }
+
+        return true;
     },
 
-    updateChatChart(days) {
-        if (!this.chatChart) return;
+    redirectToLogin() {
+        Toast.show('Silakan login terlebih dahulu', 'warning');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+    },
 
-        const data = this.generateChatData(days);
-        this.chatChart.data.labels = data.labels;
-        this.chatChart.data.datasets[0].data = data.values;
-        this.chatChart.update();
+    logout() {
+        localStorage.removeItem('gopos-token');
+        localStorage.removeItem('gopos-user');
+        window.location.href = 'index.html';
+    },
 
-        Toast.show(`Data diperbarui untuk ${days} hari terakhir`, 'success');
+    getAuthHeaders() {
+        return { 'Authorization': this.token, 'Content-Type': 'application/json' };
     }
 };
 
-// ===== Refresh Data =====
-const RefreshManager = {
-    init() {
-        document.getElementById('refreshBtn')?.addEventListener('click', () => this.refresh());
+// ===== User Management =====
+const UserManagement = {
+    users: [],
+    pollingTimer: null,
+
+    async init() {
+        this.bindEvents();
+        await this.loadUsers();
+        this.startPolling();
     },
 
-    async refresh() {
-        const btn = document.getElementById('refreshBtn');
-        const originalText = btn.innerHTML;
+    bindEvents() {
+        document.getElementById('addUserBtn')?.addEventListener('click', () => this.showAddModal());
+        document.getElementById('refreshBtn')?.addEventListener('click', () => this.loadUsers());
+        document.getElementById('logoutBtn')?.addEventListener('click', () => AuthManager.logout());
+        document.getElementById('searchInput')?.addEventListener('input', (e) => this.filterUsers(e.target.value));
+    },
 
-        btn.innerHTML = '<span class="spinner"></span> Loading...';
-        btn.disabled = true;
+    startPolling() {
+        this.pollingTimer = setInterval(() => this.loadUsers(true), CONFIG.pollingInterval);
+        document.getElementById('realtimeStatus').textContent = 'Live';
+    },
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+    stopPolling() {
+        if (this.pollingTimer) clearInterval(this.pollingTimer);
+        document.getElementById('realtimeStatus').textContent = 'Off';
+    },
 
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-
-        Toast.show('Data berhasil diperbarui!', 'success');
-    }
-};
-
-// ===== Notification =====
-const NotificationManager = {
-    init() {
-        document.getElementById('notificationBtn')?.addEventListener('click', () => {
-            Swal.fire({
-                title: 'Notifikasi',
-                html: `
-        <div style="text-align: left;">
-            <div style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                <strong>📦 Resi Baru</strong><br>
-                <small style="color: #64748b;">5 resi baru dilacak 2 menit lalu</small>
-            </div>
-            <div style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-                <strong>⭐ Feedback Baru</strong><br>
-                <small style="color: #64748b;">3 feedback baru masuk 10 menit lalu</small>
-            </div>
-            <div style="padding: 12px;">
-                <strong>💬 Chat Pending</strong><br>
-                <small style="color: #64748b;">12 chat menunggu respon</small>
-            </div>
-        </div>
-        `,
-                showConfirmButton: false,
-                showCloseButton: true
+    async loadUsers(silent = false) {
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/api/admin/users`, {
+                headers: AuthManager.getAuthHeaders()
             });
-        });
-    }
-};
 
-// ===== Active Nav Item =====
-const NavManager = {
-    init() {
-        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-        const navItems = document.querySelectorAll('.nav-item');
-
-        navItems.forEach(item => {
-            const href = item.getAttribute('href');
-            if (href === currentPage || (currentPage === '' && href === 'dashboard.html')) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
-    }
-};
-
-// ===== Counter Animation =====
-const CounterAnimation = {
-    init() {
-        const statValues = document.querySelectorAll('.stat-value');
-
-        statValues.forEach(stat => {
-            const text = stat.textContent;
-            const hasPercent = text.includes('/') || text.includes('%');
-
-            if (!hasPercent) {
-                const numericValue = parseInt(text.replace(/[^0-9]/g, ''));
-                if (!isNaN(numericValue)) {
-                    this.animateValue(stat, 0, numericValue, 1500);
+            if (!response.ok) {
+                if (response.status === 401) {
+                    AuthManager.redirectToLogin();
+                    return;
                 }
+                throw new Error('Failed to load users');
             }
+
+            this.users = await response.json();
+            this.renderTable();
+            this.updateStats();
+
+            if (!silent) Toast.show('Data berhasil dimuat', 'success');
+        } catch (error) {
+            console.error('Load users error:', error);
+            if (!silent) Toast.show('Gagal memuat data', 'error');
+        }
+    },
+
+    renderTable() {
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+
+        if (!this.users || this.users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Belum ada user terdaftar</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.users.map(user => `
+            <tr data-id="${user.id}">
+                <td><strong>${user.name || '-'}</strong></td>
+                <td>${user.phonenumber || '-'}</td>
+                <td>${user.email || '-'}</td>
+                <td><span class="badge badge-${user.role === 'admin' ? 'primary' : 'secondary'}">${user.role || 'user'}</span></td>
+                <td><span class="badge badge-${user.status === 'active' ? 'success' : 'warning'}">${user.status || 'active'}</span></td>
+                <td class="actions">
+                    <button class="btn-icon" onclick="UserManagement.showEditModal('${user.id}')" title="Edit">✏️</button>
+                    <button class="btn-icon btn-danger" onclick="UserManagement.deleteUser('${user.id}', '${user.name}')" title="Hapus">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    },
+
+    updateStats() {
+        document.getElementById('totalUsers').textContent = this.users.length;
+        document.getElementById('activeUsers').textContent = this.users.filter(u => u.status === 'active').length;
+        document.getElementById('adminUsers').textContent = this.users.filter(u => u.role === 'admin').length;
+    },
+
+    filterUsers(query) {
+        const rows = document.querySelectorAll('#usersTableBody tr');
+        const lowerQuery = query.toLowerCase();
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(lowerQuery) ? '' : 'none';
         });
     },
 
-    animateValue(element, start, end, duration) {
-        const startTime = performance.now();
-        const format = (num) => num.toLocaleString('id-ID');
+    async showAddModal() {
+        const result = await Swal.fire({
+            title: 'Tambah User Baru',
+            html: `
+                <input type="text" id="swal-name" class="swal2-input" placeholder="Nama Lengkap">
+                <input type="text" id="swal-phone" class="swal2-input" placeholder="Nomor Telepon">
+                <input type="email" id="swal-email" class="swal2-input" placeholder="Email (opsional)">
+                <select id="swal-role" class="swal2-select">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            preConfirm: () => ({
+                name: document.getElementById('swal-name').value,
+                phonenumber: document.getElementById('swal-phone').value,
+                email: document.getElementById('swal-email').value,
+                role: document.getElementById('swal-role').value,
+                status: 'active'
+            })
+        });
 
-        const update = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-            const current = Math.floor(start + (end - start) * easeOut);
+        if (result.isConfirmed && result.value.name && result.value.phonenumber) {
+            await this.createUser(result.value);
+        }
+    },
 
-            element.textContent = format(current);
+    async createUser(userData) {
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/api/admin/users`, {
+                method: 'POST',
+                headers: AuthManager.getAuthHeaders(),
+                body: JSON.stringify(userData)
+            });
 
-            if (progress < 1) {
-                requestAnimationFrame(update);
+            const data = await response.json();
+
+            if (response.ok) {
+                Toast.show('User berhasil ditambahkan', 'success');
+                await this.loadUsers();
+            } else {
+                Toast.show(data.error || 'Gagal menambah user', 'error');
             }
-        };
+        } catch (error) {
+            console.error('Create user error:', error);
+            Toast.show('Gagal menambah user', 'error');
+        }
+    },
 
-        requestAnimationFrame(update);
+    async showEditModal(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        const result = await Swal.fire({
+            title: 'Edit User',
+            html: `
+                <input type="text" id="swal-name" class="swal2-input" placeholder="Nama" value="${user.name || ''}">
+                <input type="text" id="swal-phone" class="swal2-input" placeholder="Phone" value="${user.phonenumber || ''}">
+                <input type="email" id="swal-email" class="swal2-input" placeholder="Email" value="${user.email || ''}">
+                <select id="swal-role" class="swal2-select">
+                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+                <select id="swal-status" class="swal2-select">
+                    <option value="active" ${user.status === 'active' ? 'selected' : ''}>Active</option>
+                    <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                </select>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Update',
+            cancelButtonText: 'Batal',
+            preConfirm: () => ({
+                name: document.getElementById('swal-name').value,
+                phonenumber: document.getElementById('swal-phone').value,
+                email: document.getElementById('swal-email').value,
+                role: document.getElementById('swal-role').value,
+                status: document.getElementById('swal-status').value
+            })
+        });
+
+        if (result.isConfirmed) {
+            await this.updateUser(userId, result.value);
+        }
+    },
+
+    async updateUser(userId, userData) {
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/api/admin/users?id=${userId}`, {
+                method: 'PUT',
+                headers: AuthManager.getAuthHeaders(),
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                Toast.show('User berhasil diupdate', 'success');
+                await this.loadUsers();
+            } else {
+                Toast.show('Gagal update user', 'error');
+            }
+        } catch (error) {
+            console.error('Update user error:', error);
+            Toast.show('Gagal update user', 'error');
+        }
+    },
+
+    async deleteUser(userId, userName) {
+        const result = await Swal.fire({
+            title: 'Hapus User?',
+            text: `User "${userName}" akan dihapus permanen.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/admin/users?id=${userId}`, {
+                    method: 'DELETE',
+                    headers: AuthManager.getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    Toast.show('User berhasil dihapus', 'success');
+                    await this.loadUsers();
+                } else {
+                    Toast.show('Gagal menghapus user', 'error');
+                }
+            } catch (error) {
+                console.error('Delete user error:', error);
+                Toast.show('Gagal menghapus user', 'error');
+            }
+        }
     }
 };
 
 // ===== Initialize Dashboard =====
 document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
-    SidebarManager.init();
-    ProfileDropdown.init();
-    ChartManager.init();
-    RefreshManager.init();
-    NotificationManager.init();
-    NavManager.init();
-    CounterAnimation.init();
 
-    console.log('📊 GOPOS Admin Dashboard Initialized');
+    if (AuthManager.init()) {
+        UserManagement.init();
+        console.log('📊 GOPOS Admin Dashboard Initialized');
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    UserManagement.stopPolling();
 });
