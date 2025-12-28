@@ -54,8 +54,7 @@ const AuthManager = {
         const userData = localStorage.getItem('gopos-user');
         this.user = userData ? JSON.parse(userData) : null;
         this.updateUI();
-        console.log('🔐 Auth initialized. Token:', this.token ? 'Present' : 'Missing');
-        console.log('🔐 User:', this.user);
+        console.log('🔐 Auth:', this.token ? '✓ Token Present' : '✗ No Token');
     },
 
     isLoggedIn() {
@@ -187,7 +186,7 @@ const ChatManager = {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('📥 History loaded:', data);
+                console.log('✅ History loaded:', data.messages?.length || 0, 'messages');
 
                 // Save server history for sidebar persistence
                 this.serverHistory = data;
@@ -201,19 +200,12 @@ const ChatManager = {
                     }));
                     this.rebuildConversationHistory();
                     this.renderMessages();
-                } else {
-                    console.log('ℹ️ Chat history is empty');
                 }
             } else {
                 console.error('❌ Failed to load history:', response.status);
-                console.error('❌ Response:', await response.text());
-                if (response.status === 401) {
-                    console.warn('⚠️ Token may be expired or invalid. Please logout and login again.');
-                    console.warn('⚠️ Current token:', this.token);
-                }
             }
         } catch (error) {
-            console.error('❌ Error loading chat history:', error);
+            console.error('Error loading chat history:', error);
         }
 
         this.renderHistorySidebar();
@@ -504,6 +496,13 @@ const ChatManager = {
                 });
 
                 const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('❌ Save failed:', response.status, data);
+                } else {
+                    console.log('💾 Message saved');
+                }
+
                 botResponse = data.response || 'Maaf, terjadi kesalahan.';
                 source = data.source || 'unknown';
 
@@ -525,7 +524,7 @@ const ChatManager = {
 
             this.hideTyping();
 
-            console.log(`📮 GOPOS Response (source: ${source})`);
+
 
             // Add bot response to conversation history
             this.conversationHistory.push({
@@ -546,8 +545,22 @@ const ChatManager = {
                 timestamp: new Date().toISOString()
             });
 
-            // Save to sessionStorage for guests
-            if (!AuthManager.isLoggedIn()) {
+            // Update serverHistory immediately for logged-in users
+            if (AuthManager.isLoggedIn()) {
+                if (!this.serverHistory) {
+                    this.serverHistory = {
+                        messages: []
+                    };
+                }
+                // Add new message to serverHistory
+                this.serverHistory.messages.push({
+                    message: text,
+                    response: botResponse,
+                    source: source,
+                    created_at: new Date().toISOString()
+                });
+            } else {
+                // Save to sessionStorage for guests
                 sessionStorage.setItem('gopos-chat-messages', JSON.stringify(this.messages));
             }
 
@@ -559,12 +572,8 @@ const ChatManager = {
 
             this.scrollToBottom();
 
-            // Refresh server history to keep sidebar updated
-            if (AuthManager.isLoggedIn()) {
-                await this.refreshServerHistory();
-            } else {
-                this.renderHistorySidebar();
-            }
+            // Update sidebar with new message
+            this.renderHistorySidebar();
 
         } catch (error) {
             console.error('Chat error:', error);
@@ -605,7 +614,6 @@ const ChatManager = {
                 method: 'DELETE',
                 headers: AuthManager.getAuthHeaders()
             });
-            console.log('🗑️ Chat history cleared');
         } catch (error) {
             console.error('Failed to clear history:', error);
         }
@@ -690,9 +698,13 @@ const ChatManager = {
             const response = await fetch(`${CONFIG.apiUrl}${CONFIG.endpoints.history}`, {
                 headers: AuthManager.getAuthHeaders()
             });
+
             if (response.ok) {
                 this.serverHistory = await response.json();
+                console.log('🔄 Sidebar refreshed:', this.serverHistory?.messages?.length || 0, 'messages');
                 this.renderHistorySidebar();
+            } else {
+                console.error('❌ Refresh failed:', response.status);
             }
         } catch (error) {
             console.error('Failed to refresh server history:', error);
@@ -703,7 +715,10 @@ const ChatManager = {
         const todayHistory = document.getElementById('todayHistory');
         const previousHistory = document.getElementById('previousHistory');
 
-        if (!todayHistory || !previousHistory) return;
+        if (!todayHistory || !previousHistory) {
+            console.error('❌ [SIDEBAR] Elements not found!');
+            return;
+        }
 
         // For logged-in users, use serverHistory; for guests, use this.messages
         const historyMessages = AuthManager.isLoggedIn()
@@ -744,6 +759,4 @@ document.addEventListener('DOMContentLoaded', () => {
     SidebarManager.init();
     ChatManager.init();
 
-    console.log('📮 GOPOS Chat Page initialized');
-    console.log(`🔐 User logged in: ${AuthManager.isLoggedIn()}`);
 });
